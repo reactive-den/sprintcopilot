@@ -5,6 +5,9 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Connection pooling configuration
+  // These settings help prevent connection exhaustion under load
+  relationMode = "prisma"
 }
 
 model User {

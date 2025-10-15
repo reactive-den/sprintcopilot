@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "build:check": "pnpm run build && pnpm run security:check",
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -15,6 +16,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:api": "tsx scripts/test-api.ts",
+    "security:check": "tsx scripts/check-secrets.ts",
     "prepare": "husky"
   },
   "lint-staged": {

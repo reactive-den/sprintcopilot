@@ -1,8 +1,14 @@
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
+import { env, isRedisConfigured } from './env';
 
 // Initialize Redis client
-const redis = process.env.UPSTASH_REDIS_REST_URL ? Redis.fromEnv() : null;
+const redis = isRedisConfigured
+  ? new Redis({
+      url: env.UPSTASH_REDIS_REST_URL!,
+      token: env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
 
 // Create rate limiter (10 requests per hour per IP)
 export const rateLimiter = redis
