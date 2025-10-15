@@ -2,30 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    
+
     const run = await prisma.run.findUnique({
       where: { id },
       include: {
         tickets: {
-          orderBy: [
-            { sprint: 'asc' },
-            { priority: 'desc' },
-          ],
+          orderBy: [{ sprint: 'asc' }, { priority: 'desc' }],
         },
         project: true,
       },
     });
-    
+
     if (!run) {
       throw new NotFoundError('Run');
     }
-    
+
     // Map priority (1-10) to Jira priority names
     const mapPriority = (priority: number) => {
       if (priority >= 9) return 'Highest';
@@ -34,9 +28,9 @@ export async function GET(
       if (priority >= 3) return 'Low';
       return 'Lowest';
     };
-    
+
     // Generate Jira-compatible JSON
-    const jiraIssues = run.tickets.map(ticket => ({
+    const jiraIssues = run.tickets.map((ticket) => ({
       summary: ticket.title,
       description: `${ticket.description}\n\n*Acceptance Criteria:*\n${ticket.acceptanceCriteria}`,
       issuetype: { name: 'Story' },
@@ -46,7 +40,7 @@ export async function GET(
       timeoriginalestimate: ticket.estimateHours ? ticket.estimateHours * 3600 : undefined, // Convert hours to seconds
       customfield_sprint: ticket.sprint || undefined,
     }));
-    
+
     return NextResponse.json(jiraIssues, {
       status: 200,
       headers: {
@@ -55,7 +49,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    const errorResponse = handleApiError(error);
+    const errorResponse = handleApiError(error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(errorResponse, { status: errorResponse.statusCode });
   }
 }

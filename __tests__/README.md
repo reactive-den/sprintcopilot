@@ -27,6 +27,7 @@ pnpm test:api
 ```
 
 **What it does:**
+
 1. Creates a test project
 2. Starts a run (triggers LangGraph pipeline)
 3. Polls until completion (1-3 minutes)
@@ -34,6 +35,7 @@ pnpm test:api
 5. Validates all responses
 
 **Requirements:**
+
 - Development server must be running (`pnpm dev`)
 - `OPENAI_API_KEY` must be set in `.env`
 - Database must be accessible
@@ -99,7 +101,7 @@ describe('My Feature', () => {
         problem: 'Test problem',
       },
     });
-    
+
     expect(result).toBeDefined();
     expect(result.title).toBe('Test Project');
   });
@@ -115,6 +117,7 @@ pnpm test:coverage
 ```
 
 View the HTML report:
+
 ```bash
 open coverage/index.html
 ```

@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String?
+  createdAt DateTime   @default(now())
+  projects  Project[]
+  apiUsage  ApiUsage[]
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  userId      String?
+  title       String
+  problem     String   @db.Text
+  constraints String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        Run[]
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Run {
+  id              String    @id @default(cuid())
+  projectId       String
+  createdAt       DateTime  @default(now())
+  status          RunStatus @default(PENDING)
+  clarifications  Json?
+  hld             Json?
+  summary         String?   @db.Text
+  errorMessage    String?   @db.Text
+  tokensUsed      Int       @default(0)
+  durationMs      Int?
+  tickets         Ticket[]
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model Ticket {
+  id                  String       @id @default(cuid())
+  runId               String
+  title               String
+  description         String       @db.Text
+  acceptanceCriteria  String       @db.Text
+  estimateHours       Int?
+  tshirtSize          TShirtSize?
+  priority            Int
+  sprint              Int?
+  status              TicketStatus @default(TODO)
+  dependencies        String[]
+  tags                String[]
+  run                 Run          @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+}
+
+model ApiUsage {
+  id         String   @id @default(cuid())
+  userId     String
+  endpoint   String
+  tokensUsed Int
+  cost       Float
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+enum RunStatus {
+  PENDING
+  CLARIFYING
+  DRAFTING_HLD
+  SLICING_TICKETS
+  ESTIMATING
+  PRIORITIZING
+  COMPLETED
+  FAILED
+}
+
+enum TicketStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TShirtSize {
+  XS
+  S
+  M
+  L
+  XL
+}
