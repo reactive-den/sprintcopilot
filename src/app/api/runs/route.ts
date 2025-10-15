@@ -50,8 +50,18 @@ export async function POST(request: NextRequest) {
       },
     });
     
+    console.log('✅ [RUNS] Run created:', {
+      runId: run.id,
+      projectId: project.id,
+      projectTitle: project.title,
+    });
+    
     // Start pipeline asynchronously (don't await)
-    executePipeline(run.id, project).catch(console.error);
+    console.log('🚀 [RUNS] Starting pipeline execution asynchronously...');
+    executePipeline(run.id, project).catch((error) => {
+      console.error('❌ [RUNS] Pipeline execution failed:', error);
+      console.error('Stack trace:', error.stack);
+    });
     
     return NextResponse.json(
       { run },
@@ -72,14 +82,30 @@ export async function POST(request: NextRequest) {
 async function executePipeline(runId: string, project: any) {
   const startTime = Date.now();
   
+  console.log('🔄 [PIPELINE] Starting execution:', {
+    runId,
+    projectId: project.id,
+    projectTitle: project.title,
+  });
+  
   try {
     // Update status to CLARIFYING
+    console.log('📝 [PIPELINE] Updating status to CLARIFYING...');
     await prisma.run.update({
       where: { id: runId },
       data: { status: 'CLARIFYING' },
     });
     
+    console.log('🏗️ [PIPELINE] Creating LangGraph pipeline...');
     const pipeline = createPipeline();
+    
+    console.log('▶️ [PIPELINE] Invoking pipeline with input:', {
+      projectId: project.id,
+      title: project.title,
+      problemLength: project.problem?.length || 0,
+      hasConstraints: !!project.constraints,
+    });
+    
     const result = await pipeline.invoke({
       projectId: project.id,
       title: project.title,
@@ -90,8 +116,16 @@ async function executePipeline(runId: string, project: any) {
       tokensUsed: 0,
     });
     
+    console.log('✅ [PIPELINE] Pipeline completed:', {
+      currentStep: result.currentStep,
+      tokensUsed: result.tokensUsed,
+      hasErrors: result.errors?.length > 0,
+      ticketCount: result.finalTickets?.length || 0,
+    });
+    
     // Check if pipeline failed
     if (result.currentStep === 'FAILED') {
+      console.error('❌ [PIPELINE] Pipeline failed with errors:', result.errors);
       await prisma.run.update({
         where: { id: runId },
         data: {
@@ -105,6 +139,7 @@ async function executePipeline(runId: string, project: any) {
     
     // Save tickets
     if (result.finalTickets && result.finalTickets.length > 0) {
+      console.log(`💾 [PIPELINE] Saving ${result.finalTickets.length} tickets...`);
       await prisma.ticket.createMany({
         data: result.finalTickets.map((ticket: any) => ({
           runId,
@@ -120,9 +155,20 @@ async function executePipeline(runId: string, project: any) {
           tags: ticket.tags || [],
         })),
       });
+      console.log('✅ [PIPELINE] Tickets saved successfully');
+    } else {
+      console.warn('⚠️ [PIPELINE] No tickets generated');
     }
     
     // Update run with final results
+    const duration = Date.now() - startTime;
+    console.log('💾 [PIPELINE] Updating run with final results:', {
+      status: 'COMPLETED',
+      tokensUsed: result.tokensUsed,
+      durationMs: duration,
+      durationSec: (duration / 1000).toFixed(2),
+    });
+    
     await prisma.run.update({
       where: { id: runId },
       data: {
@@ -130,17 +176,27 @@ async function executePipeline(runId: string, project: any) {
         clarifications: result.clarifications || null,
         hld: result.hld || null,
         tokensUsed: result.tokensUsed,
-        durationMs: Date.now() - startTime,
+        durationMs: duration,
       },
     });
+    
+    console.log('🎉 [PIPELINE] Execution completed successfully!');
   } catch (error) {
-    console.error('Pipeline execution error:', error);
+    const duration = Date.now() - startTime;
+    console.error('❌ [PIPELINE] Execution error:', {
+      runId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      durationMs: duration,
+    });
+    console.error('❌ [PIPELINE] Full error:', error);
+    console.error('❌ [PIPELINE] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+    
     await prisma.run.update({
       where: { id: runId },
       data: {
         status: 'FAILED',
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        durationMs: Date.now() - startTime,
+        durationMs: duration,
       },
     });
   }

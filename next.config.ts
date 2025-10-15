@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {
+    root: process.cwd(), // Explicitly set the project root to silence workspace warning
+  },
 };
 
 export default nextConfig;
