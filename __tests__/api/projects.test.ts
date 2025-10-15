@@ -38,7 +38,7 @@ describe('Projects API', () => {
 
       await expect(
         prisma.project.create({
-          data: invalidData as any,
+          data: invalidData as { title: string; problem: string },
         })
       ).rejects.toThrow();
     });

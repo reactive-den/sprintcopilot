@@ -7,11 +7,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = createProjectSchema.parse(body);
-    
+
     const project = await prisma.project.create({
       data: validated,
     });
-    
+
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {
     const errorResponse = handleApiError(error);
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const projects = await prisma.project.findMany({
       orderBy: { createdAt: 'desc' },
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-    
+
     return NextResponse.json({ projects });
   } catch (error) {
     const errorResponse = handleApiError(error);

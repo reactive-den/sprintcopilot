@@ -10,7 +10,10 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, public details?: any) {
+  constructor(
+    message: string,
+    public details?: unknown
+  ) {
     super(message, 400, 'VALIDATION_ERROR');
     this.details = details;
   }
@@ -24,7 +27,10 @@ export class RateLimitError extends AppError {
 }
 
 export class LLMError extends AppError {
-  constructor(message: string, public originalError?: any) {
+  constructor(
+    message: string,
+    public originalError?: unknown
+  ) {
     super(message, 500, 'LLM_ERROR');
     this.originalError = originalError;
   }
@@ -38,7 +44,7 @@ export class NotFoundError extends AppError {
 
 export const handleApiError = (error: unknown) => {
   console.error('API Error:', error);
-  
+
   if (error instanceof AppError) {
     return {
       error: error.message,
@@ -48,17 +54,17 @@ export const handleApiError = (error: unknown) => {
       ...(error instanceof RateLimitError && { resetTime: error.resetTime }),
     };
   }
-  
+
   // Zod validation errors
   if (error && typeof error === 'object' && 'issues' in error) {
     return {
       error: 'Validation failed',
       code: 'VALIDATION_ERROR',
       statusCode: 400,
-      details: (error as any).issues,
+      details: (error as { issues: unknown }).issues,
     };
   }
-  
+
   // Generic error
   return {
     error: 'Internal server error',
@@ -73,21 +79,21 @@ export async function retryWithBackoff<T>(
   maxRetries: number = 3,
   baseDelay: number = 1000
 ): Promise<T> {
-  let lastError: any;
-  
+  let lastError: unknown;
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       if (i < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, i);
         console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
-  
+
   throw new LLMError(`Failed after ${maxRetries} retries`, lastError);
 }

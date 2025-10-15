@@ -28,7 +28,7 @@ const STATUS_ICONS: Record<string, string> = {
 };
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  use(params);
   const searchParams = useSearchParams();
   const runId = searchParams.get('runId');
   const [activeRunId, setActiveRunId] = useState(runId);
@@ -82,14 +82,12 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">🚀</span>
                 </div>
-                <h1 className="text-4xl font-black text-gray-900">
-                  {run.project.title}
-                </h1>
+                <h1 className="text-4xl font-black text-gray-900">{run.project.title}</h1>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">{run.project.problem}</p>
             </div>
           </div>
-          
+
           {/* Progress Section */}
           {isProcessing && (
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
@@ -158,7 +156,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
               </div>
               <h2 className="text-3xl font-bold text-gray-900">Clarifications</h2>
             </div>
-            
+
             {run.clarifications.questions && run.clarifications.questions.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -167,7 +165,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 </h3>
                 <div className="space-y-3">
                   {run.clarifications.questions.map((q: string, i: number) => (
-                    <div key={i} className="flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <div
+                      key={i}
+                      className="flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100"
+                    >
                       <span className="text-blue-600 font-bold">{i + 1}.</span>
                       <p className="text-gray-700 flex-1">{q}</p>
                     </div>
@@ -197,7 +198,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
               </div>
               <h2 className="text-3xl font-bold text-gray-900">High-Level Design</h2>
             </div>
-            
+
             {run.hld.modules && run.hld.modules.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -206,7 +207,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 </h3>
                 <div className="grid gap-3">
                   {run.hld.modules.map((m: string, i: number) => (
-                    <div key={i} className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:border-purple-300 transition-colors">
+                    <div
+                      key={i}
+                      className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:border-purple-300 transition-colors"
+                    >
                       <p className="text-gray-700">{m}</p>
                     </div>
                   ))}
@@ -244,49 +248,81 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 <h2 className="text-3xl font-bold text-gray-900">Sprint Tickets</h2>
               </div>
               <div className="px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 rounded-full">
-                <span className="text-sm font-bold text-orange-700">{run.tickets.length} tickets</span>
+                <span className="text-sm font-bold text-orange-700">
+                  {run.tickets.length} tickets
+                </span>
               </div>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b-2 border-gray-200">
-                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Title</th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Size</th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hours</th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Sprint</th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Priority</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Size
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Hours
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Sprint
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Priority
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {run.tickets.map((ticket: any) => (
-                    <tr key={ticket.id} className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-colors">
-                      <td className="px-4 py-4 text-sm font-medium text-gray-900">{ticket.title}</td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-sm">
-                          {ticket.tshirtSize}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className="font-semibold text-gray-700">{ticket.estimateHours}h</span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
-                          Sprint {ticket.sprint}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                          ticket.priority >= 8 ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white' :
-                          ticket.priority >= 5 ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white' :
-                          'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
-                        }`}>
-                          P{ticket.priority}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {run.tickets.map(
+                    (ticket: {
+                      id: string;
+                      title: string;
+                      tshirtSize: string;
+                      estimateHours: number;
+                      sprint: number;
+                      priority: number;
+                    }) => (
+                      <tr
+                        key={ticket.id}
+                        className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-colors"
+                      >
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                          {ticket.title}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-sm">
+                            {ticket.tshirtSize}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span className="font-semibold text-gray-700">
+                            {ticket.estimateHours}h
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                            Sprint {ticket.sprint}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+                              ticket.priority >= 8
+                                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                                : ticket.priority >= 5
+                                  ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
+                                  : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
+                            }`}
+                          >
+                            P{ticket.priority}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>

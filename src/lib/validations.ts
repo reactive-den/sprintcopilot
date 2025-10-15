@@ -2,7 +2,10 @@ import { z } from 'zod';
 
 export const createProjectSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title too long'),
-  problem: z.string().min(20, 'Problem statement must be at least 20 characters').max(2000, 'Problem statement too long'),
+  problem: z
+    .string()
+    .min(20, 'Problem statement must be at least 20 characters')
+    .max(2000, 'Problem statement too long'),
   constraints: z.string().max(1000, 'Constraints too long').optional(),
 });
 

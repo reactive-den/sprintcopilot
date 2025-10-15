@@ -45,12 +45,11 @@ export default function Home() {
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
                   <span className="text-white text-xl">✨</span>
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900">
-                  Create Your Sprint Plan
-                </h2>
+                <h2 className="text-3xl font-bold text-gray-900">Create Your Sprint Plan</h2>
               </div>
               <p className="text-gray-600 text-lg">
-                Describe your feature and watch AI generate a complete sprint plan with tickets, estimates, and priorities in minutes.
+                Describe your feature and watch AI generate a complete sprint plan with tickets,
+                estimates, and priorities in minutes.
               </p>
             </div>
 
@@ -65,7 +64,8 @@ export default function Home() {
               </div>
               <h3 className="font-bold text-gray-900 mb-2 text-lg">Smart Clarification</h3>
               <p className="text-gray-600">
-                AI identifies ambiguities and suggests clarifying questions to ensure perfect understanding
+                AI identifies ambiguities and suggests clarifying questions to ensure perfect
+                understanding
               </p>
             </div>
 
@@ -75,7 +75,8 @@ export default function Home() {
               </div>
               <h3 className="font-bold text-gray-900 mb-2 text-lg">High-Level Design</h3>
               <p className="text-gray-600">
-                Generates comprehensive architecture overview with modules, data flows, and technical risks
+                Generates comprehensive architecture overview with modules, data flows, and
+                technical risks
               </p>
             </div>
 

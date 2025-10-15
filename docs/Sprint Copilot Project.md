@@ -1,12 +1,13 @@
-
 # SprintCopilot — “Plain-English Feature → Tickets in 60s”
 
 ## One-liner (what you’ll tell the client)
+
 Give me a feature idea in plain English, and I’ll turn it into: clarified scope, acceptance criteria, a mini-HLD, and a prioritized ticket list ready to import into Jira/ClickUp — all in under a minute.
 
 ---
 
 ## Why this works for a client demo
+
 - **Immediate value**: every team needs faster grooming.
 - **Visually satisfying**: form in → multi-step progress → clean roadmap/tickets table, with export.
 - **Small build surface**: 3–4 screens, a handful of endpoints, simple DB.
@@ -15,6 +16,7 @@ Give me a feature idea in plain English, and I’ll turn it into: clarified scop
 ---
 
 ## MVP Scope (tight & shippable)
+
 1. **Input**: Feature title + problem statement + optional constraints.
 2. **Agent chain (LangGraph)**:
    - `Clarifier`: rewrites/asks 3–5 clarifying Qs & assumptions.
@@ -32,6 +34,7 @@ Give me a feature idea in plain English, and I’ll turn it into: clarified scop
 ---
 
 ## Tech Stack (aligned with your preferences)
+
 - **FE**: Next.js (TypeScript), TailwindCSS + shadcn/ui, React Hook Form, React Query.
 - **BE**: Next.js API routes (or NestJS), LangGraph/LangChain, zod, OpenAI.
 - **DB**: Postgres + Prisma (or Supabase).
@@ -40,6 +43,7 @@ Give me a feature idea in plain English, and I’ll turn it into: clarified scop
 ---
 
 ## Data Model (Prisma)
+
 ```prisma
 model Project {
   id           String   @id @default(cuid())
@@ -81,6 +85,7 @@ model Ticket {
 ---
 
 ## API Surface (Next.js /api)
+
 - `POST /api/projects` → create project.
 - `GET /api/projects/:id` → get project + last run summary.
 - `POST /api/runs` → `{ projectId }` → kicks off LangGraph pipeline.
@@ -90,7 +95,9 @@ model Ticket {
 ---
 
 ## The Agent Graph (LangGraph)
+
 ### Nodes
+
 1. `clarifier`: clarifies feature
 2. `hld_drafter`: drafts HLD
 3. `ticket_slicer`: breaks into tickets
@@ -103,6 +110,7 @@ model Ticket {
 ---
 
 ## Frontend UX (shadcn + Tailwind)
+
 1. **Create Brief** (page: `/`)
 2. **Results** (page: `/projects/:id`)
 3. **History** (page: `/projects`)
@@ -111,6 +119,7 @@ model Ticket {
 ---
 
 ## Example Jira JSON export
+
 ```json
 [
   {
@@ -127,6 +136,7 @@ model Ticket {
 ---
 
 ## Repo Structure
+
 ```
 sprintcopilot/
 ├─ app/
@@ -157,6 +167,7 @@ sprintcopilot/
 ---
 
 ## Demo Script (5 minutes)
+
 1. Type a feature.
 2. Click **Generate** → see steps.
 3. Show clarifications, HLD, tickets.
@@ -165,12 +176,14 @@ sprintcopilot/
 ---
 
 ## Build Plan (1–2 days)
+
 **Day 1**: Scaffold, DB, Clarifier + HLD nodes.  
 **Day 2**: Tickets, Estimation, Prioritization, UI polish.
 
 ---
 
 ## Stretch Goals
+
 - Dependency graph visualization.
 - Quality gates.
 - Persona presets (Startup vs Enterprise).
@@ -178,6 +191,7 @@ sprintcopilot/
 ---
 
 ## Why LangGraph
+
 - Deterministic flow.
 - Partial retries.
 - Auditability.
@@ -185,6 +199,7 @@ sprintcopilot/
 ---
 
 ## Quick Start Commands
+
 ```bash
 pnpm dlx create-next-app@latest sprintcopilot --ts --tailwind
 cd sprintcopilot
@@ -215,6 +230,7 @@ For detailed implementation guidance, refer to:
   - Deployment checklist
 
 These documents address all missing pieces identified during planning:
+
 1. ✅ Environment configuration with all required variables
 2. ✅ Complete Prisma schema with User, ApiUsage models
 3. ✅ Detailed LangGraph implementation with state and prompts

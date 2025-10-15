@@ -3,6 +3,7 @@
 ## Environment Configuration
 
 ### `.env.example`
+
 ```env
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/sprintcopilot"
@@ -31,6 +32,7 @@ DEFAULT_SPRINT_CAPACITY=40  # hours per sprint
 ## Enhanced Prisma Schema
 
 ### `prisma/schema.prisma`
+
 ```prisma
 generator client {
   provider = "prisma-client-js"
@@ -60,7 +62,7 @@ model Project {
   updatedAt   DateTime @updatedAt
   runs        Run[]
   user        User?    @relation(fields: [userId], references: [id])
-  
+
   @@index([userId])
 }
 
@@ -77,7 +79,7 @@ model Run {
   durationMs      Int?
   tickets         Ticket[]
   project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
+
   @@index([projectId])
   @@index([status])
 }
@@ -96,7 +98,7 @@ model Ticket {
   dependencies        String[]     // Array of ticket IDs
   tags                String[]
   run                 Run          @relation(fields: [runId], references: [id], onDelete: Cascade)
-  
+
   @@index([runId])
 }
 
@@ -108,7 +110,7 @@ model ApiUsage {
   cost        Float
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id])
-  
+
   @@index([userId, createdAt])
 }
 
@@ -143,12 +145,16 @@ enum TShirtSize {
 ## Zod Validation Schemas
 
 ### `lib/validations.ts`
+
 ```typescript
 import { z } from 'zod';
 
 export const createProjectSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title too long'),
-  problem: z.string().min(20, 'Problem statement must be at least 20 characters').max(2000, 'Problem statement too long'),
+  problem: z
+    .string()
+    .min(20, 'Problem statement must be at least 20 characters')
+    .max(2000, 'Problem statement too long'),
   constraints: z.string().max(1000, 'Constraints too long').optional(),
 });
 
@@ -202,6 +208,7 @@ export const hldSchema = z.object({
 ## LangGraph State & Prompts
 
 ### `lib/langgraph/state.ts`
+
 ```typescript
 import { Annotation } from '@langchain/langgraph';
 
@@ -211,51 +218,66 @@ export const GraphState = Annotation.Root({
   title: Annotation<string>,
   problem: Annotation<string>,
   constraints: Annotation<string | undefined>,
-  
+
   // Clarifier outputs
-  clarifications: Annotation<{
-    questions: string[];
-    assumptions: string[];
-    scope: string;
-  } | undefined>,
-  
+  clarifications: Annotation<
+    | {
+        questions: string[];
+        assumptions: string[];
+        scope: string;
+      }
+    | undefined
+  >,
+
   // HLD outputs
-  hld: Annotation<{
-    modules: string[];
-    dataFlows: string[];
-    risks: string[];
-    nfrs: string[];
-  } | undefined>,
-  
+  hld: Annotation<
+    | {
+        modules: string[];
+        dataFlows: string[];
+        risks: string[];
+        nfrs: string[];
+      }
+    | undefined
+  >,
+
   // Ticket slicer outputs
-  rawTickets: Annotation<Array<{
-    title: string;
-    description: string;
-    acceptanceCriteria: string;
-  }> | undefined>,
-  
+  rawTickets: Annotation<
+    | Array<{
+        title: string;
+        description: string;
+        acceptanceCriteria: string;
+      }>
+    | undefined
+  >,
+
   // Estimator outputs
-  estimatedTickets: Annotation<Array<{
-    title: string;
-    description: string;
-    acceptanceCriteria: string;
-    estimateHours: number;
-    tshirtSize: string;
-  }> | undefined>,
-  
+  estimatedTickets: Annotation<
+    | Array<{
+        title: string;
+        description: string;
+        acceptanceCriteria: string;
+        estimateHours: number;
+        tshirtSize: string;
+      }>
+    | undefined
+  >,
+
   // Prioritizer outputs
-  finalTickets: Annotation<Array<{
-    title: string;
-    description: string;
-    acceptanceCriteria: string;
-    estimateHours: number;
-    tshirtSize: string;
-    priority: number;
-    sprint: number;
-    dependencies: string[];
-    tags: string[];
-  }> | undefined>,
-  
+  finalTickets: Annotation<
+    | Array<{
+        title: string;
+        description: string;
+        acceptanceCriteria: string;
+        estimateHours: number;
+        tshirtSize: string;
+        priority: number;
+        sprint: number;
+        dependencies: string[];
+        tags: string[];
+      }>
+    | undefined
+  >,
+
   // Metadata
   currentStep: Annotation<string>,
   errors: Annotation<string[]>,
@@ -266,6 +288,7 @@ export type GraphStateType = typeof GraphState.State;
 ```
 
 ### `lib/langgraph/prompts.ts`
+
 ```typescript
 export const CLARIFIER_PROMPT = `You are a senior product manager helping clarify a feature request.
 
@@ -406,6 +429,7 @@ Return ONLY valid JSON array with priority, sprint, dependencies, and tags added
 ## Error Handling
 
 ### `lib/errors.ts`
+
 ```typescript
 export class AppError extends Error {
   constructor(
@@ -419,7 +443,10 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, public details?: any) {
+  constructor(
+    message: string,
+    public details?: any
+  ) {
     super(message, 400, 'VALIDATION_ERROR');
     this.details = details;
   }
@@ -433,7 +460,10 @@ export class RateLimitError extends AppError {
 }
 
 export class LLMError extends AppError {
-  constructor(message: string, public originalError?: any) {
+  constructor(
+    message: string,
+    public originalError?: any
+  ) {
     super(message, 500, 'LLM_ERROR');
     this.originalError = originalError;
   }
@@ -447,7 +477,7 @@ export class NotFoundError extends AppError {
 
 export const handleApiError = (error: unknown) => {
   console.error('API Error:', error);
-  
+
   if (error instanceof AppError) {
     return {
       error: error.message,
@@ -457,7 +487,7 @@ export const handleApiError = (error: unknown) => {
       ...(error instanceof RateLimitError && { resetTime: error.resetTime }),
     };
   }
-  
+
   // Zod validation errors
   if (error && typeof error === 'object' && 'issues' in error) {
     return {
@@ -467,7 +497,7 @@ export const handleApiError = (error: unknown) => {
       details: error.issues,
     };
   }
-  
+
   // Generic error
   return {
     error: 'Internal server error',
@@ -483,21 +513,21 @@ export async function retryWithBackoff<T>(
   baseDelay: number = 1000
 ): Promise<T> {
   let lastError: any;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
       lastError = error;
-      
+
       if (i < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, i);
         console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
-  
+
   throw new LLMError(`Failed after ${maxRetries} retries`, lastError);
 }
 ```
@@ -507,14 +537,13 @@ export async function retryWithBackoff<T>(
 ## Rate Limiting
 
 ### `lib/rate-limit.ts`
+
 ```typescript
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 
 // Initialize Redis client
-const redis = process.env.UPSTASH_REDIS_REST_URL
-  ? Redis.fromEnv()
-  : null;
+const redis = process.env.UPSTASH_REDIS_REST_URL ? Redis.fromEnv() : null;
 
 // Create rate limiter (10 requests per hour per IP)
 export const rateLimiter = redis
@@ -536,9 +565,9 @@ export async function checkRateLimit(identifier: string) {
       reset: new Date(Date.now() + 3600000),
     };
   }
-  
+
   const { success, limit, reset, remaining } = await rateLimiter.limit(identifier);
-  
+
   return {
     success,
     limit,
@@ -552,12 +581,11 @@ export async function withRateLimit(
   request: Request,
   handler: () => Promise<Response>
 ): Promise<Response> {
-  const ip = request.headers.get('x-forwarded-for') || 
-             request.headers.get('x-real-ip') || 
-             'anonymous';
-  
+  const ip =
+    request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous';
+
   const { success, reset, remaining } = await checkRateLimit(ip);
-  
+
   if (!success) {
     return new Response(
       JSON.stringify({
@@ -575,13 +603,13 @@ export async function withRateLimit(
       }
     );
   }
-  
+
   const response = await handler();
-  
+
   // Add rate limit headers to successful responses
   response.headers.set('X-RateLimit-Remaining', remaining.toString());
   response.headers.set('X-RateLimit-Reset', reset.toISOString());
-  
+
   return response;
 }
 ```
@@ -591,6 +619,7 @@ export async function withRateLimit(
 ## Testing Configuration
 
 ### `jest.config.js`
+
 ```javascript
 const nextJest = require('next/jest');
 
@@ -617,6 +646,7 @@ module.exports = createJestConfig(customJestConfig);
 ```
 
 ### `jest.setup.js`
+
 ```javascript
 import '@testing-library/jest-dom';
 
@@ -630,12 +660,14 @@ process.env.OPENAI_API_KEY = 'sk-test-key';
 ## Deployment Configuration
 
 ### `DEPLOYMENT.md`
-```markdown
+
+````markdown
 # Deployment Checklist
 
 ## Pre-deployment
 
 ### Environment Variables
+
 - [ ] DATABASE_URL (Supabase/Neon connection string)
 - [ ] OPENAI_API_KEY (with sufficient credits)
 - [ ] OPENAI_MODEL (gpt-4o-mini or gpt-4o)
@@ -645,6 +677,7 @@ process.env.OPENAI_API_KEY = 'sk-test-key';
 - [ ] NEXTAUTH_URL (production URL)
 
 ### Database
+
 - [ ] Provision Postgres database (Supabase/Neon/Railway)
 - [ ] Enable connection pooling
 - [ ] Configure backups
@@ -652,6 +685,7 @@ process.env.OPENAI_API_KEY = 'sk-test-key';
 - [ ] Verify schema with: `npx prisma db pull`
 
 ### Testing
+
 - [ ] All API endpoints tested locally
 - [ ] LangGraph pipeline tested with real OpenAI
 - [ ] Export functionality verified
@@ -661,6 +695,7 @@ process.env.OPENAI_API_KEY = 'sk-test-key';
 ## Vercel Deployment
 
 ### Project Configuration
+
 ```bash
 # Build settings
 Build Command: pnpm build
@@ -668,13 +703,16 @@ Output Directory: .next
 Install Command: pnpm install
 Node Version: 20.x
 ```
+````
 
 ### Environment Variables in Vercel
+
 1. Go to Project Settings > Environment Variables
 2. Add all variables from `.env.example`
 3. Set for Production, Preview, and Development
 
 ### Deploy
+
 ```bash
 # Connect to Vercel
 vercel link
@@ -686,6 +724,7 @@ vercel --prod
 ## Post-deployment
 
 ### Verification
+
 - [ ] Test homepage loads
 - [ ] Create a test project
 - [ ] Verify LangGraph pipeline completes

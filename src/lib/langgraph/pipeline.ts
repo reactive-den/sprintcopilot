@@ -19,6 +19,6 @@ export function createPipeline() {
     .addEdge('ticket_slicer', 'estimator')
     .addEdge('estimator', 'prioritizer')
     .addEdge('prioritizer', END);
-  
+
   return workflow.compile();
 }

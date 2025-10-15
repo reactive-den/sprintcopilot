@@ -8,13 +8,13 @@ interface Run {
   id: string;
   projectId: string;
   status: string;
-  clarifications?: any;
-  hld?: any;
+  clarifications?: unknown;
+  hld?: unknown;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;
   createdAt: string;
-  tickets: any[];
+  tickets: unknown[];
   project: {
     id: string;
     title: string;
@@ -62,7 +62,7 @@ export function useRun(runId: string | undefined, options?: { enabled?: boolean 
       const data = await response.json();
       return data.run as Run;
     },
-    enabled: !!runId && (options?.enabled !== false),
+    enabled: !!runId && options?.enabled !== false,
     refetchInterval: (query) => {
       const run = query.state.data;
       // Poll every 2 seconds if run is in progress

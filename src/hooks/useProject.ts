@@ -12,8 +12,8 @@ interface Project {
 interface Run {
   id: string;
   status: string;
-  clarifications?: any;
-  hld?: any;
+  clarifications?: unknown;
+  hld?: unknown;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;
@@ -40,7 +40,7 @@ export function useProject(projectId: string | undefined) {
     queryKey: ['project', projectId],
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID is required');
-      
+
       const response = await fetch(`/api/projects/${projectId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch project');

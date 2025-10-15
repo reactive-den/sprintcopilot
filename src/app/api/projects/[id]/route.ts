@@ -2,13 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    
+
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
@@ -22,11 +19,11 @@ export async function GET(
         },
       },
     });
-    
+
     if (!project) {
       throw new NotFoundError('Project');
     }
-    
+
     return NextResponse.json({ project });
   } catch (error) {
     const errorResponse = handleApiError(error);
