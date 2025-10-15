@@ -30,17 +30,21 @@ describe('Projects API', () => {
       expect(project.constraints).toBe(projectData.constraints);
     });
 
-    it('should fail with invalid data', async () => {
-      const invalidData = {
-        title: 'Too short', // Less than 10 characters
+    it('should create project even with short data (validation happens at API level)', async () => {
+      const shortData = {
+        title: 'Too short', // Less than 10 characters - but Prisma doesn't validate
         problem: 'Short',
       };
 
-      await expect(
-        prisma.project.create({
-          data: invalidData as { title: string; problem: string },
-        })
-      ).rejects.toThrow();
+      // Prisma doesn't validate - it just stores data
+      // Validation happens at the API route level with Zod
+      const project = await prisma.project.create({
+        data: shortData,
+      });
+
+      expect(project).toBeDefined();
+      expect(project.title).toBe(shortData.title);
+      expect(project.problem).toBe(shortData.problem);
     });
   });
 

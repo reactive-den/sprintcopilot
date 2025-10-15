@@ -160,7 +160,7 @@ async function testAPI() {
       const sprints = new Set(
         currentRun.tickets.map((t: { sprint?: number }) => t.sprint).filter(Boolean)
       );
-      sprints.forEach((sprint: number) => {
+      sprints.forEach((sprint: unknown) => {
         const sprintTickets = currentRun.tickets.filter(
           (t: { sprint?: number }) => t.sprint === sprint
         );

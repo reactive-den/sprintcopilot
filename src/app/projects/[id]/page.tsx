@@ -276,53 +276,42 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {run.tickets.map(
-                    (ticket: {
-                      id: string;
-                      title: string;
-                      tshirtSize: string;
-                      estimateHours: number;
-                      sprint: number;
-                      priority: number;
-                    }) => (
-                      <tr
-                        key={ticket.id}
-                        className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-colors"
-                      >
-                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                          {ticket.title}
-                        </td>
-                        <td className="px-4 py-4 text-sm">
-                          <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-sm">
-                            {ticket.tshirtSize}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm">
-                          <span className="font-semibold text-gray-700">
-                            {ticket.estimateHours}h
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm">
-                          <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
-                            Sprint {ticket.sprint}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                              ticket.priority >= 8
-                                ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
-                                : ticket.priority >= 5
-                                  ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
-                                  : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
-                            }`}
-                          >
-                            P{ticket.priority}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  )}
+                  {run.tickets.map((ticket) => (
+                    <tr
+                      key={ticket.id}
+                      className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-colors"
+                    >
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {ticket.title}
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-sm">
+                          {ticket.tshirtSize}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <span className="font-semibold text-gray-700">{ticket.estimateHours}h</span>
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                          Sprint {ticket.sprint}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+                            ticket.priority >= 8
+                              ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                              : ticket.priority >= 5
+                                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
+                                : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
+                          }`}
+                        >
+                          P{ticket.priority}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

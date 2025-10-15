@@ -12,7 +12,7 @@ export async function hldDrafterNode(state: GraphStateType): Promise<Partial<Gra
   }
 
   const prompt = HLD_PROMPT.replace('{title}', state.title)
-    .replace('{scope}', state.clarifications.scope)
+    .replace('{scope}', state.clarifications.scope || 'Not specified')
     .replace('{problem}', state.problem)
     .replace('{constraints}', state.constraints || 'None');
 

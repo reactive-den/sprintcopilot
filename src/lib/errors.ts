@@ -1,3 +1,5 @@
+import type { ValidationDetails, ZodError } from '@/types';
+
 export class AppError extends Error {
   constructor(
     message: string,
@@ -12,7 +14,7 @@ export class AppError extends Error {
 export class ValidationError extends AppError {
   constructor(
     message: string,
-    public details?: unknown
+    public details?: ValidationDetails | ValidationDetails[]
   ) {
     super(message, 400, 'VALIDATION_ERROR');
     this.details = details;
@@ -29,7 +31,7 @@ export class RateLimitError extends AppError {
 export class LLMError extends AppError {
   constructor(
     message: string,
-    public originalError?: unknown
+    public originalError?: Error
   ) {
     super(message, 500, 'LLM_ERROR');
     this.originalError = originalError;
@@ -42,7 +44,7 @@ export class NotFoundError extends AppError {
   }
 }
 
-export const handleApiError = (error: unknown) => {
+export const handleApiError = (error: Error | ZodError | AppError) => {
   console.error('API Error:', error);
 
   if (error instanceof AppError) {
@@ -57,17 +59,18 @@ export const handleApiError = (error: unknown) => {
 
   // Zod validation errors
   if (error && typeof error === 'object' && 'issues' in error) {
+    const zodError = error as ZodError;
     return {
       error: 'Validation failed',
       code: 'VALIDATION_ERROR',
       statusCode: 400,
-      details: (error as { issues: unknown }).issues,
+      details: zodError.issues,
     };
   }
 
   // Generic error
   return {
-    error: 'Internal server error',
+    error: error instanceof Error ? error.message : 'Internal server error',
     code: 'INTERNAL_ERROR',
     statusCode: 500,
   };
@@ -79,13 +82,13 @@ export async function retryWithBackoff<T>(
   maxRetries: number = 3,
   baseDelay: number = 1000
 ): Promise<T> {
-  let lastError: unknown;
+  let lastError: Error | undefined;
 
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       if (i < maxRetries - 1) {
         const delay = baseDelay * Math.pow(2, i);

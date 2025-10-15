@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { Clarifications, HLD, Ticket } from '@/types';
 
 interface CreateRunInput {
   projectId: string;
@@ -8,13 +9,13 @@ interface Run {
   id: string;
   projectId: string;
   status: string;
-  clarifications?: unknown;
-  hld?: unknown;
+  clarifications?: Clarifications;
+  hld?: HLD;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;
   createdAt: string;
-  tickets: unknown[];
+  tickets: Ticket[];
   project: {
     id: string;
     title: string;

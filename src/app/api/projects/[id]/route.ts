@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ project });
   } catch (error) {
-    const errorResponse = handleApiError(error);
+    const errorResponse = handleApiError(error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(errorResponse, { status: errorResponse.statusCode });
   }
 }

@@ -4,6 +4,7 @@ import { createRunSchema } from '@/lib/validations';
 import { createPipeline } from '@/lib/langgraph/pipeline';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { handleApiError, NotFoundError } from '@/lib/errors';
+import type { PipelineProject, PipelineTicket } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,15 +74,12 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    const errorResponse = handleApiError(error);
+    const errorResponse = handleApiError(error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(errorResponse, { status: errorResponse.statusCode });
   }
 }
 
-async function executePipeline(
-  runId: string,
-  project: { id: string; title: string; problem: string; constraints: string | null }
-) {
+async function executePipeline(runId: string, project: PipelineProject) {
   const startTime = Date.now();
 
   console.log('🔄 [PIPELINE] Starting execution:', {
@@ -143,31 +141,21 @@ async function executePipeline(
     if (result.finalTickets && result.finalTickets.length > 0) {
       console.log(`💾 [PIPELINE] Saving ${result.finalTickets.length} tickets...`);
       await prisma.ticket.createMany({
-        data: result.finalTickets.map(
-          (ticket: {
-            title: string;
-            description: string;
-            acceptanceCriteria: string[];
-            estimateHours: number;
-            tshirtSize: string;
-            priority: number;
-            sprint: number;
-            dependencies?: string[];
-            tags?: string[];
-          }) => ({
-            runId,
-            title: ticket.title,
-            description: ticket.description,
-            acceptanceCriteria: ticket.acceptanceCriteria.join('\n'),
-            estimateHours: ticket.estimateHours,
-            tshirtSize: ticket.tshirtSize as 'XS' | 'S' | 'M' | 'L' | 'XL',
-            priority: ticket.priority,
-            sprint: ticket.sprint,
-            status: 'TODO' as const,
-            dependencies: ticket.dependencies || [],
-            tags: ticket.tags || [],
-          })
-        ),
+        data: result.finalTickets.map((ticket: PipelineTicket) => ({
+          runId,
+          title: ticket.title,
+          description: ticket.description,
+          acceptanceCriteria: Array.isArray(ticket.acceptanceCriteria)
+            ? ticket.acceptanceCriteria.join('\n')
+            : ticket.acceptanceCriteria,
+          estimateHours: ticket.estimateHours,
+          tshirtSize: ticket.tshirtSize as 'XS' | 'S' | 'M' | 'L' | 'XL',
+          priority: ticket.priority,
+          sprint: ticket.sprint,
+          status: 'TODO' as const,
+          dependencies: ticket.dependencies || [],
+          tags: ticket.tags || [],
+        })),
       });
       console.log('✅ [PIPELINE] Tickets saved successfully');
     } else {

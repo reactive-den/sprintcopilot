@@ -1,4 +1,5 @@
 import { Annotation } from '@langchain/langgraph';
+import type { Clarifications, HLD, RawTicket, EstimatedTicket, FinalTicket } from '@/types';
 
 export const GraphState = Annotation.Root({
   // Input
@@ -8,63 +9,19 @@ export const GraphState = Annotation.Root({
   constraints: Annotation<string | undefined>,
 
   // Clarifier outputs
-  clarifications: Annotation<
-    | {
-        questions: string[];
-        assumptions: string[];
-        scope: string;
-      }
-    | undefined
-  >,
+  clarifications: Annotation<Clarifications | undefined>,
 
   // HLD outputs
-  hld: Annotation<
-    | {
-        modules: string[];
-        dataFlows: string[];
-        risks: string[];
-        nfrs: string[];
-      }
-    | undefined
-  >,
+  hld: Annotation<HLD | undefined>,
 
   // Ticket slicer outputs
-  rawTickets: Annotation<
-    | Array<{
-        title: string;
-        description: string;
-        acceptanceCriteria: string;
-      }>
-    | undefined
-  >,
+  rawTickets: Annotation<RawTicket[] | undefined>,
 
   // Estimator outputs
-  estimatedTickets: Annotation<
-    | Array<{
-        title: string;
-        description: string;
-        acceptanceCriteria: string;
-        estimateHours: number;
-        tshirtSize: string;
-      }>
-    | undefined
-  >,
+  estimatedTickets: Annotation<EstimatedTicket[] | undefined>,
 
   // Prioritizer outputs
-  finalTickets: Annotation<
-    | Array<{
-        title: string;
-        description: string;
-        acceptanceCriteria: string;
-        estimateHours: number;
-        tshirtSize: string;
-        priority: number;
-        sprint: number;
-        dependencies: string[];
-        tags: string[];
-      }>
-    | undefined
-  >,
+  finalTickets: Annotation<FinalTicket[] | undefined>,
 
   // Metadata
   currentStep: Annotation<string>,

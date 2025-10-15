@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import type { Clarifications, HLD, Ticket } from '@/types';
 
 interface Project {
   id: string;
@@ -12,27 +13,13 @@ interface Project {
 interface Run {
   id: string;
   status: string;
-  clarifications?: unknown;
-  hld?: unknown;
+  clarifications?: Clarifications;
+  hld?: HLD;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;
   createdAt: string;
   tickets: Ticket[];
-}
-
-interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  acceptanceCriteria: string;
-  estimateHours?: number;
-  tshirtSize?: string;
-  priority: number;
-  sprint?: number;
-  status: string;
-  dependencies: string[];
-  tags: string[];
 }
 
 export function useProject(projectId: string | undefined) {

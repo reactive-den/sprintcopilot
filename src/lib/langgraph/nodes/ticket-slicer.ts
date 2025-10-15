@@ -12,8 +12,8 @@ export async function ticketSlicerNode(state: GraphStateType): Promise<Partial<G
   }
 
   const prompt = TICKET_SLICER_PROMPT.replace('{title}', state.title)
-    .replace('{scope}', state.clarifications.scope)
-    .replace('{modules}', state.hld.modules.join(', '))
+    .replace('{scope}', state.clarifications.scope || 'Not specified')
+    .replace('{modules}', state.hld.modules?.join(', ') || 'Not specified')
     .replace('{problem}', state.problem);
 
   try {
