@@ -84,6 +84,12 @@ const envSchema = z.object({
  * This will throw an error if validation fails, preventing the app from starting
  */
 function validateEnv() {
+  // Skip validation during Docker build
+  if (process.env.SKIP_ENV_VALIDATION === '1') {
+    console.log('⚠️  Skipping environment validation (SKIP_ENV_VALIDATION=1)');
+    return {} as z.infer<typeof envSchema>;
+  }
+
   try {
     const parsed = envSchema.parse(process.env);
     return parsed;

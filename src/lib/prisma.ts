@@ -14,7 +14,11 @@ export const prisma =
     log: isDevelopment ? ['query', 'error', 'warn'] : ['error'],
     datasources: {
       db: {
-        url: env.DATABASE_URL,
+        // Use dummy URL during build if SKIP_ENV_VALIDATION is set
+        url:
+          process.env.SKIP_ENV_VALIDATION === '1'
+            ? 'postgresql://dummy:dummy@localhost:5432/dummy'
+            : env.DATABASE_URL,
       },
     },
   });
