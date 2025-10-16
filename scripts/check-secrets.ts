@@ -9,7 +9,7 @@
  * - We look for ACTUAL secret values, not just variable name strings
  */
 
-import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 // Patterns that indicate ACTUAL secret values (not just variable names)
@@ -101,7 +101,7 @@ function checkFile(filePath: string): void {
         });
       }
     });
-  } catch (error) {
+  } catch {
     console.warn(`⚠️  Could not read file: ${filePath}`);
   }
 }
