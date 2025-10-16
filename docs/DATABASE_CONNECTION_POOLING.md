@@ -293,5 +293,5 @@ WHERE datname = 'sprintcopilot';
 
 ---
 
-**Last Updated**: January 16, 2025  
+**Last Updated**: October 16, 2025  
 **Maintained By**: SprintCopilot Team

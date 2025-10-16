@@ -534,6 +534,6 @@ A: Docker Desktop works on Windows. Use PowerShell or WSL2.
 
 ---
 
-**Last Updated**: January 16, 2025  
+**Last Updated**: October 16, 2025  
 **Docker Version**: 20.10+  
 **Docker Compose Version**: 2.0+
