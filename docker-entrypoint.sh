@@ -14,13 +14,14 @@ echo "✅ PostgreSQL is ready!"
 
 # Run database migrations
 echo "🔄 Running database migrations..."
-npx prisma migrate deploy
+PRISMA_CLI_VERSION="${PRISMA_CLI_VERSION:-6.17.1}"
+npx "prisma@${PRISMA_CLI_VERSION}" migrate deploy
 
 echo "✅ Migrations completed!"
 
 # Generate Prisma Client (in case it's not already generated)
 echo "🔧 Generating Prisma Client..."
-npx prisma generate
+npx "prisma@${PRISMA_CLI_VERSION}" generate
 
 echo "✅ Prisma Client generated!"
 

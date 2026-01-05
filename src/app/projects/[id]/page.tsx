@@ -16,7 +16,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const [activeRunId, setActiveRunId] = useState(runId);
 
   const { data: run, isLoading, error } = useRun(activeRunId || undefined);
-  const { exportCSV, exportJira, isExporting, exportError } = useExport();
+  const { exportCSV, createClickUpTasks, isExporting, exportError } = useExport();
 
   useEffect(() => {
     if (runId && !activeRunId) {
@@ -94,19 +94,19 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   )}
                 </button>
                 <button
-                  onClick={() => exportJira(run.id, run.project.title)}
+                  onClick={() => createClickUpTasks(run.id)}
                   disabled={isExporting}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                   {isExporting ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Exporting...</span>
+                      <span>Creating...</span>
                     </>
                   ) : (
                     <>
-                      <span>🎫</span>
-                      <span>Export Jira JSON</span>
+                      <span>✅</span>
+                      <span>Create ClickUp Tasks</span>
                     </>
                   )}
                 </button>

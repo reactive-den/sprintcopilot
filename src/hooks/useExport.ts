@@ -33,37 +33,32 @@ export function useExport() {
     }
   };
 
-  const exportJira = async (runId: string, projectTitle: string) => {
+  const createClickUpTasks = async (runId: string) => {
     setIsExporting(true);
     setExportError(null);
     try {
-      const response = await fetch(`/api/runs/${runId}/export/jira`);
+      const response = await fetch(`/api/runs/${runId}/export/clickup`, {
+        method: 'POST',
+      });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to export Jira JSON' }));
-        throw new Error(errorData.error || 'Failed to export Jira JSON');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create ClickUp tasks' }));
+        throw new Error(errorData.error || 'Failed to create ClickUp tasks');
       }
 
       const data = await response.json();
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: 'application/json',
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `sprintcopilot-${projectTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-jira.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (data.failed?.length) {
+        setExportError(`Created ${data.created?.length || 0} tasks, ${data.failed.length} failed.`);
+      }
+      return data;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to export Jira JSON';
+      const message = error instanceof Error ? error.message : 'Failed to create ClickUp tasks';
       setExportError(message);
-      console.error('Export Jira error:', error);
+      console.error('Create ClickUp tasks error:', error);
       throw error;
     } finally {
       setIsExporting(false);
     }
   };
 
-  return { exportCSV, exportJira, isExporting, exportError };
+  return { exportCSV, createClickUpTasks, isExporting, exportError };
 }

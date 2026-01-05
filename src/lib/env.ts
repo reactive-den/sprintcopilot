@@ -37,6 +37,10 @@ const envSchema = z.object({
 
   UPSTASH_REDIS_REST_TOKEN: z.string().optional().or(z.literal('')),
 
+  // ClickUp Configuration (Optional)
+  CLICKUP_API_TOKEN: z.string().optional().or(z.literal('')),
+  CLICKUP_LIST_ID: z.string().optional().or(z.literal('')),
+
   // Application Configuration
   MAX_FEATURE_LENGTH: z
     .string()
