@@ -36,24 +36,31 @@ export function ProjectForm() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create project');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create project');
       }
 
       return response.json();
     },
     onSuccess: async (data) => {
-      // Create a run immediately
-      const runResponse = await fetch('/api/runs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: data.project.id }),
-      });
+      try {
+        // Create a run immediately
+        const runResponse = await fetch('/api/runs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: data.project.id }),
+        });
 
-      if (runResponse.ok) {
+        if (!runResponse.ok) {
+          const errorData = await runResponse.json();
+          throw new Error(errorData.error || 'Failed to start pipeline');
+        }
+
         const runData = await runResponse.json();
         router.push(`/projects/${data.project.id}?runId=${runData.run.id}`);
-      } else {
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to start pipeline');
+        // Still navigate to project page even if run creation fails
         router.push(`/projects/${data.project.id}`);
       }
     },
