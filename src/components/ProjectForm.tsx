@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,21 +15,9 @@ const projectSchema = z.object({
 
 type ProjectFormData = z.infer<typeof projectSchema>;
 
-const LOADING_MESSAGES = [
-  { icon: '🚀', text: 'Initializing AI Sprint Planner...', color: 'from-blue-400 to-blue-600' },
-  { icon: '🎯', text: 'Analyzing your requirements...', color: 'from-purple-400 to-purple-600' },
-  { icon: '🏗️', text: 'Crafting high-level architecture...', color: 'from-indigo-400 to-indigo-600' },
-  { icon: '✂️', text: 'Breaking down into user stories...', color: 'from-pink-400 to-pink-600' },
-  { icon: '📊', text: 'Estimating effort and complexity...', color: 'from-orange-400 to-orange-600' },
-  { icon: '🎨', text: 'Prioritizing and scheduling...', color: 'from-green-400 to-green-600' },
-  { icon: '✨', text: 'Finalizing your sprint plan...', color: 'from-indigo-400 to-purple-600' },
-];
-
 export function ProjectForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
   const {
     register,
@@ -85,133 +73,6 @@ export function ProjectForm() {
     setError(null);
     createProject.mutate(data);
   };
-
-  // Rotate loading messages
-  useEffect(() => {
-    if (!createProject.isPending) return;
-
-    const interval = setInterval(() => {
-      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [createProject.isPending]);
-
-  // Generate particles for loading animation
-  useEffect(() => {
-    if (!createProject.isPending) return;
-
-    const newParticles = Array.from({ length: 30 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 2,
-    }));
-    setParticles(newParticles);
-  }, [createProject.isPending]);
-
-  const currentMessage = LOADING_MESSAGES[loadingMessageIndex];
-
-  // Full-screen loading overlay
-  if (createProject.isPending) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-hidden">
-        {/* Animated Background Particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {particles.map((particle) => (
-            <div
-              key={particle.id}
-              className="absolute w-3 h-3 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full opacity-20 animate-float"
-              style={{
-                left: `${particle.x}%`,
-                top: `${particle.y}%`,
-                animationDelay: `${particle.delay}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Animated Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
-
-        {/* Main Content */}
-        <div className="relative z-10 text-center px-4 max-w-2xl">
-          {/* Animated Icon Container */}
-          <div className="relative mb-8 flex justify-center">
-            {/* Pulsing Rings */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-40 h-40 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-20 animate-ping" />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-30 animate-pulse" />
-            </div>
-
-            {/* Main Icon */}
-            <div className={`relative w-32 h-32 rounded-full bg-gradient-to-br ${currentMessage.color} flex items-center justify-center shadow-2xl animate-bounce-slow`}>
-              <span className="text-6xl filter drop-shadow-lg animate-pulse-slow">
-                {currentMessage.icon}
-              </span>
-            </div>
-          </div>
-
-          {/* Loading Message */}
-          <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mb-4 animate-fade-in">
-            {currentMessage.text}
-          </h2>
-
-          {/* Progress Dots */}
-          <div className="flex items-center justify-center gap-2 mb-8">
-            {LOADING_MESSAGES.map((_, index) => (
-              <div
-                key={index}
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  index === loadingMessageIndex
-                    ? 'w-8 bg-gradient-to-r from-indigo-500 to-purple-500'
-                    : index < loadingMessageIndex
-                      ? 'w-2 bg-green-400'
-                      : 'w-2 bg-gray-300'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Animated Progress Bar */}
-          <div className="relative w-full max-w-md mx-auto h-3 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-fast" />
-            <div
-              className={`absolute inset-y-0 left-0 bg-gradient-to-r ${currentMessage.color} rounded-full transition-all duration-1000 ease-out shadow-lg`}
-              style={{ width: `${((loadingMessageIndex + 1) / LOADING_MESSAGES.length) * 100}%` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer-fast" />
-              <div className="absolute inset-0 bg-white/20 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Fun Loading Indicator */}
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-3 h-3 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.15}s` }}
-                />
-              ))}
-            </div>
-            <span className="text-sm font-semibold text-gray-600 animate-pulse">
-              AI is working its magic
-            </span>
-          </div>
-
-          {/* Subtle hint */}
-          <p className="mt-8 text-sm text-gray-500 animate-fade-in">
-            This usually takes 30-60 seconds...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

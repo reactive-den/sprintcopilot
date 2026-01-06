@@ -8,12 +8,12 @@ interface ProgressIndicatorProps {
 }
 
 const PIPELINE_STEPS = [
-  { key: 'PENDING', label: 'Initializing', icon: '⏳', order: 0, color: 'from-blue-400 to-blue-600' },
-  { key: 'CLARIFYING', label: 'Clarifying Requirements', icon: '🎯', order: 1, color: 'from-purple-400 to-purple-600' },
-  { key: 'DRAFTING_HLD', label: 'Drafting High-Level Design', icon: '🏗️', order: 2, color: 'from-indigo-400 to-indigo-600' },
-  { key: 'SLICING_TICKETS', label: 'Creating User Stories', icon: '✂️', order: 3, color: 'from-pink-400 to-pink-600' },
-  { key: 'ESTIMATING', label: 'Estimating Effort', icon: '📊', order: 4, color: 'from-orange-400 to-orange-600' },
-  { key: 'PRIORITIZING', label: 'Prioritizing & Scheduling', icon: '🎨', order: 5, color: 'from-green-400 to-green-600' },
+  { key: 'PENDING', label: 'Initializing', icon: '⏳', order: 0, color: 'from-indigo-500 to-purple-500' },
+  { key: 'CLARIFYING', label: 'Clarifying Requirements', icon: '🎯', order: 1, color: 'from-indigo-500 to-purple-500' },
+  { key: 'DRAFTING_HLD', label: 'Drafting High-Level Design', icon: '🏗️', order: 2, color: 'from-purple-500 to-pink-500' },
+  { key: 'SLICING_TICKETS', label: 'Creating User Stories', icon: '✂️', order: 3, color: 'from-purple-500 to-pink-500' },
+  { key: 'ESTIMATING', label: 'Estimating Effort', icon: '📊', order: 4, color: 'from-pink-500 to-red-500' },
+  { key: 'PRIORITIZING', label: 'Prioritizing & Scheduling', icon: '🎨', order: 5, color: 'from-pink-500 to-red-500' },
 ] as const;
 
 const STATUS_TO_ORDER: Record<string, number> = {
@@ -50,9 +50,19 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
   const currentStep = PIPELINE_STEPS.find((step) => step.key === status);
   const [messageIndex, setMessageIndex] = useState(0);
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
-  const [visualProgress, setVisualProgress] = useState(0);
-  const [statusMeta, setStatusMeta] = useState({ startedAt: Date.now(), baseProgress: 0 });
-  const progressRef = useRef(0);
+
+  // Initialize progress based on current status to avoid glitch
+  const [visualProgress, setVisualProgress] = useState(() => {
+    const range = STATUS_PROGRESS[status];
+    return range ? range.min : 0;
+  });
+
+  const [statusMeta, setStatusMeta] = useState(() => ({
+    startedAt: Date.now(),
+    baseProgress: STATUS_PROGRESS[status]?.min || 0,
+  }));
+
+  const progressRef = useRef(STATUS_PROGRESS[status]?.min || 0);
 
   const isProcessing = status !== 'COMPLETED' && status !== 'FAILED';
   const isFailed = status === 'FAILED';
@@ -80,10 +90,17 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
       return;
     }
     const range = STATUS_PROGRESS[status] || { min: 0, max: 95, durationMs: 12000 };
+
+    // Ensure progress never goes backward
+    const newBaseProgress = Math.max(progressRef.current, range.min);
+
     setStatusMeta({
       startedAt: Date.now(),
-      baseProgress: Math.max(progressRef.current, range.min),
+      baseProgress: newBaseProgress,
     });
+
+    // Immediately update visual progress to avoid jumps
+    setVisualProgress((prev) => Math.max(prev, newBaseProgress));
   }, [status]);
 
   useEffect(() => {
@@ -125,14 +142,14 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
   };
 
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl p-8 border-2 border-indigo-200 shadow-2xl ${className}`}>
+    <div className={`relative overflow-hidden bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-2xl ${className}`}>
       {/* Animated Background Particles */}
       {isProcessing && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {particles.map((particle) => (
             <div
               key={particle.id}
-              className="absolute w-2 h-2 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full opacity-20 animate-float"
+              className="absolute w-2 h-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full opacity-10 animate-float"
               style={{
                 left: `${particle.x}%`,
                 top: `${particle.y}%`,
@@ -157,8 +174,8 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
             {/* Pulsing Rings */}
             {isProcessing && (
               <>
-                <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-20 animate-ping" />
-                <div className="absolute inset-0 -m-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 opacity-30 animate-pulse" />
+                <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-20 animate-ping" />
+                <div className="absolute inset-0 -m-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-30 animate-pulse" />
               </>
             )}
 
@@ -183,7 +200,7 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
                 <button
                   type="button"
                   onClick={handleShuffleMessage}
-                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/70 px-4 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-indigo-300 bg-white px-4 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:shadow-md"
                 >
                   <span aria-hidden="true">🎲</span>
                   Change vibe
@@ -226,7 +243,6 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
           {PIPELINE_STEPS.map((step, index) => {
             const isCompleted = step.order < currentOrder;
             const isCurrent = step.key === status;
-            const isUpcoming = step.order > currentOrder;
 
             return (
               <div

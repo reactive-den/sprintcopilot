@@ -16,9 +16,9 @@ export default async function AdminTicketsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50 to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="container mx-auto px-4 py-10">
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-orange-100 mb-8">
+        <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100 mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-4xl font-black text-gray-900 mb-2">Admin Ticket View</h1>
@@ -27,14 +27,14 @@ export default async function AdminTicketsPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="px-4 py-2 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full">
-                <span className="text-sm font-bold text-orange-700">
+              <div className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
+                <span className="text-sm font-bold text-indigo-700">
                   {tickets.length} tickets
                 </span>
               </div>
               <Link
                 href="/"
-                className="px-4 py-2 rounded-full border border-orange-200 text-orange-700 font-semibold hover:bg-orange-50 transition-colors"
+                className="px-4 py-2 rounded-full border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50 transition-colors"
               >
                 Back to Home
               </Link>
@@ -43,7 +43,7 @@ export default async function AdminTicketsPage() {
         </div>
 
         {tickets.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-orange-100 text-center">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 text-center">
             <div className="text-5xl mb-4">🗂️</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">No tickets yet</h2>
             <p className="text-gray-600">Run a project to generate tickets for this list.</p>
@@ -58,7 +58,7 @@ export default async function AdminTicketsPage() {
               return (
                 <div
                   key={ticket.id}
-                  className="bg-white rounded-2xl shadow-lg border border-orange-100 p-6"
+                  className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-2">
@@ -116,8 +116,8 @@ export default async function AdminTicketsPage() {
                     </div>
                   </div>
 
-                  <details className="mt-5 rounded-xl border border-orange-100 bg-orange-50/50 p-4">
-                    <summary className="cursor-pointer font-semibold text-orange-700">
+                  <details className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
+                    <summary className="cursor-pointer font-semibold text-indigo-700 hover:text-indigo-800 transition-colors">
                       View full details
                     </summary>
                     <div className="mt-4 space-y-4 text-sm text-gray-700">

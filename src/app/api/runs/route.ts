@@ -106,15 +106,59 @@ async function executePipeline(runId: string, project: PipelineProject) {
       hasConstraints: !!project.constraints,
     });
 
-    const result = await pipeline.invoke({
+    // Execute pipeline with streaming to capture intermediate results
+    const initialState = {
       projectId: project.id,
       title: project.title,
       problem: project.problem,
       constraints: project.constraints || '',
       currentStep: 'PENDING',
-      errors: [],
+      errors: [] as string[],
       tokensUsed: 0,
-    });
+    };
+
+    // Execute pipeline and update status after each major step
+    const stream = await pipeline.stream(initialState);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any = initialState;
+
+    for await (const output of stream) {
+      // LangGraph stream returns { nodeName: result } for each node
+      const entries = Object.entries(output);
+      if (entries.length > 0) {
+        const [nodeName, nodeResult] = entries[0];
+        // Store the latest result
+        result = nodeResult;
+
+        // Update database status based on completed node
+        if (nodeName === 'clarifier') {
+          console.log('✅ [PIPELINE] Clarifier completed, updating to DRAFTING_HLD...');
+          await prisma.run.update({
+            where: { id: runId },
+            data: { status: 'DRAFTING_HLD' },
+          });
+        } else if (nodeName === 'hld_drafter') {
+          console.log('✅ [PIPELINE] HLD Drafter completed, updating to SLICING_TICKETS...');
+          await prisma.run.update({
+            where: { id: runId },
+            data: { status: 'SLICING_TICKETS' },
+          });
+        } else if (nodeName === 'ticket_slicer') {
+          console.log('✅ [PIPELINE] Ticket Slicer completed, updating to ESTIMATING...');
+          await prisma.run.update({
+            where: { id: runId },
+            data: { status: 'ESTIMATING' },
+          });
+        } else if (nodeName === 'estimator') {
+          console.log('✅ [PIPELINE] Estimator completed, updating to PRIORITIZING...');
+          await prisma.run.update({
+            where: { id: runId },
+            data: { status: 'PRIORITIZING' },
+          });
+        }
+      }
+    }
 
     console.log('✅ [PIPELINE] Pipeline completed:', {
       currentStep: result.currentStep,
