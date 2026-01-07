@@ -9,7 +9,18 @@ export async function clarifierNode(state: GraphStateType): Promise<Partial<Grap
     title: state.title,
     problemLength: state.problem?.length || 0,
     hasConstraints: !!state.constraints,
+    hasExistingClarifications: !!state.clarifications,
   });
+
+  // If clarifications are already provided (from chat session), skip LLM call
+  if (state.clarifications) {
+    console.log('✅ [CLARIFIER] Using provided clarifications, skipping LLM call');
+    return {
+      clarifications: state.clarifications,
+      currentStep: 'CLARIFYING',
+      tokensUsed: state.tokensUsed,
+    };
+  }
 
   const prompt = CLARIFIER_PROMPT.replace('{title}', state.title)
     .replace('{problem}', state.problem)

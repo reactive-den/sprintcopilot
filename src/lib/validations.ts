@@ -9,8 +9,16 @@ export const createProjectSchema = z.object({
   constraints: z.string().max(1000, 'Constraints too long').optional(),
 });
 
+export const clarificationsSchema = z.object({
+  questions: z.array(z.string()),
+  assumptions: z.array(z.string()),
+  scope: z.string(),
+});
+
 export const createRunSchema = z.object({
   projectId: z.string().cuid('Invalid project ID'),
+  clarifierSessionId: z.string().uuid().optional(),
+  clarifications: clarificationsSchema.optional(),
 });
 
 export const runStatusSchema = z.enum([
@@ -38,12 +46,6 @@ export const ticketSchema = z.object({
   sprint: z.number().positive().optional(),
   dependencies: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
-});
-
-export const clarificationsSchema = z.object({
-  questions: z.array(z.string()),
-  assumptions: z.array(z.string()),
-  scope: z.string(),
 });
 
 export const hldSchema = z.object({
