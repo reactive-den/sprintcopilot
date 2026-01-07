@@ -98,13 +98,13 @@ async function executePipeline(
   });
 
   try {
-    // If clarifications are provided, skip CLARIFYING status and go straight to DRAFTING_HLD
+    // If clarifications are provided, skip CLARIFYING status and go straight to ANALYZING_REPO
     if (providedClarifications) {
       console.log('📝 [PIPELINE] Using provided clarifications, skipping clarifier node...');
       await prisma.run.update({
         where: { id: runId },
         data: {
-          status: 'DRAFTING_HLD',
+          status: 'ANALYZING_REPO',
           clarifications: providedClarifications as Prisma.InputJsonValue,
         },
       });
@@ -133,6 +133,7 @@ async function executePipeline(
       title: project.title,
       problem: project.problem,
       constraints: project.constraints || '',
+      repoUrl: project.repoUrl || undefined,
       clarifications: providedClarifications || undefined,
       currentStep: 'PENDING',
       errors: [] as string[],
@@ -155,7 +156,13 @@ async function executePipeline(
 
         // Update database status based on completed node
         if (nodeName === 'clarifier') {
-          console.log('✅ [PIPELINE] Clarifier completed, updating to DRAFTING_HLD...');
+          console.log('✅ [PIPELINE] Clarifier completed, updating to ANALYZING_REPO...');
+          await prisma.run.update({
+            where: { id: runId },
+            data: { status: 'ANALYZING_REPO' },
+          });
+        } else if (nodeName === 'repo_analyzer') {
+          console.log('✅ [PIPELINE] Repo Analyzer completed, updating to DRAFTING_HLD...');
           await prisma.run.update({
             where: { id: runId },
             data: { status: 'DRAFTING_HLD' },
@@ -243,6 +250,7 @@ async function executePipeline(
         status: 'COMPLETED',
         clarifications: result.clarifications || undefined,
         hld: result.hld || undefined,
+        repoAnalysis: result.repoAnalysis || undefined,
         tokensUsed: result.tokensUsed,
         durationMs: duration,
       },

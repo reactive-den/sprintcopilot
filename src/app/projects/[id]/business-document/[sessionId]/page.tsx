@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { BusinessDocument } from '@/lib/business-document';
 
@@ -15,11 +15,7 @@ export default function BusinessDocumentPage({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDocument();
-  }, [sessionId]);
-
-  const loadDocument = async () => {
+  const loadDocument = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/clarifier/sessions/${sessionId}/business-document`
@@ -49,7 +45,11 @@ export default function BusinessDocumentPage({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  useEffect(() => {
+    loadDocument();
+  }, [loadDocument]);
 
   const downloadDocument = async () => {
     if (!businessDocument || typeof window === 'undefined') return;
@@ -314,6 +314,13 @@ export default function BusinessDocumentPage({
               <p className="text-gray-600">Business Requirements Document</p>
             </div>
             <div className="flex gap-3">
+              <button
+                onClick={() => router.push(`/projects/${projectId}`)}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
+              >
+                <span>🧭</span>
+                <span>Repo Analysis</span>
+              </button>
               <button
                 onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"

@@ -55,7 +55,7 @@ export async function POST(
     const bddDocument = await prisma.bddDocument.create({
       data: {
         sessionId: id,
-        contentJson: businessDocument as Prisma.InputJsonValue,
+        contentJson: businessDocument as unknown as Prisma.InputJsonValue,
       },
     });
 

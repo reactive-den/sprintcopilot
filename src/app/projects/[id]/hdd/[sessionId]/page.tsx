@@ -1,8 +1,6 @@
 'use client';
 
-'use client';
-
-import { use, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
@@ -36,11 +34,7 @@ export default function HDDPage({
     users: false,
   });
 
-  useEffect(() => {
-    loadSection(activeSection);
-  }, [activeSection, sessionId]);
-
-  const loadSection = async (section: HDDSection) => {
+  const loadSection = useCallback(async (section: HDDSection) => {
     if (content[section]) {
       // Content already loaded in state
       return;
@@ -73,7 +67,11 @@ export default function HDDPage({
     } finally {
       setLoading((prev) => ({ ...prev, [section]: false }));
     }
-  };
+  }, [content, sessionId]);
+
+  useEffect(() => {
+    loadSection(activeSection);
+  }, [activeSection, loadSection]);
 
   const downloadMarkdown = (section: HDDSection) => {
     if (!content[section] || typeof window === 'undefined') return;
