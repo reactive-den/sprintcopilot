@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useRun } from '@/hooks/useRun';
 import { useExport } from '@/hooks/useExport';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
@@ -10,10 +10,12 @@ import { HLDCard } from '@/components/HLDCard';
 import { TicketsTable } from '@/components/TicketsTable';
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
-  use(params);
+  const { id: projectId } = use(params);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const runId = searchParams.get('runId');
   const [activeRunId, setActiveRunId] = useState(runId);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const { data: run, isLoading, error } = useRun(activeRunId || undefined);
   const { exportCSV, createClickUpTasks, isExporting, exportError } = useExport();
@@ -23,6 +25,24 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
       setActiveRunId(runId);
     }
   }, [runId, activeRunId]);
+
+  // Load latest session for business document
+  useEffect(() => {
+    const loadSession = async () => {
+      try {
+        const response = await fetch(`/api/projects/${projectId}/sessions`);
+        if (response.ok) {
+          const { session } = await response.json();
+          if (session) {
+            setSessionId(session.id);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load session:', error);
+      }
+    };
+    loadSession();
+  }, [projectId]);
 
   if (isLoading) {
     return (
@@ -76,6 +96,15 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           {run.status === 'COMPLETED' && (
             <>
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                {sessionId && (
+                  <button
+                    onClick={() => router.push(`/projects/${projectId}/business-document/${sessionId}`)}
+                    className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    <span>📄</span>
+                    <span>View Business Document</span>
+                  </button>
+                )}
                 <button
                   onClick={() => exportCSV(run.id, run.project.title)}
                   disabled={isExporting}

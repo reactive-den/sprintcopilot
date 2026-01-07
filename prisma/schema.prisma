@@ -20,15 +20,17 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  userId      String?
-  title       String
-  problem     String   @db.Text
-  constraints String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  runs        Run[]
-  user        User?    @relation(fields: [userId], references: [id])
+  id                String              @id @default(cuid())
+  userId            String?
+  title             String
+  problem           String              @db.Text
+  constraints       String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  runs              Run[]
+  clarifierSessions ClarifierSession[]
+  hddDocuments      HDDDocument[]
+  user              User?               @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
@@ -79,6 +81,66 @@ model ApiUsage {
   user       User     @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
+}
+
+model ClarifierSession {
+  id          String              @id @default(uuid())
+  projectId   String
+  tenantId    String?
+  status      String
+  idea        String              @db.Text
+  context     String?             @db.Text
+  constraints String?             @db.Text
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  messages    ClarifierMessage[]
+  bddDocuments BddDocument[]
+  hddDocuments HDDDocument[]
+  project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model ClarifierMessage {
+  id        String            @id @default(uuid())
+  sessionId String
+  role      String
+  content   String            @db.Text
+  createdAt DateTime          @default(now())
+  session   ClarifierSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model BddDocument {
+  id          String            @id @default(uuid())
+  sessionId   String
+  tenantId    String?
+  contentJson Json
+  createdAt   DateTime          @default(now())
+  session     ClarifierSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([tenantId])
+}
+
+model HDDDocument {
+  id          String            @id @default(uuid())
+  sessionId   String
+  projectId   String
+  section     String            // 'architecture', 'deployment', 'dataflow', 'users'
+  content     String            @db.Text
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  session     ClarifierSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, section])
+  @@index([sessionId])
+  @@index([projectId])
+  @@index([section])
 }
 
 enum RunStatus {

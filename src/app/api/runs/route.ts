@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { createRunSchema } from '@/lib/validations';
-import { createPipeline } from '@/lib/langgraph/pipeline';
-import { checkRateLimit } from '@/lib/rate-limit';
 import { handleApiError, NotFoundError } from '@/lib/errors';
-import type { PipelineProject, PipelineTicket } from '@/types';
+import { createPipeline } from '@/lib/langgraph/pipeline';
+import { prisma } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRunSchema } from '@/lib/validations';
+import type { Clarifications, PipelineProject, PipelineTicket } from '@/types';
+import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { projectId } = createRunSchema.parse(body);
+    const { projectId, clarifierSessionId, clarifications } = createRunSchema.parse(body);
 
     // Get project
     const project = await prisma.project.findUnique({
@@ -42,11 +43,12 @@ export async function POST(request: NextRequest) {
       throw new NotFoundError('Project');
     }
 
-    // Create run
+    // Create run with clarifications if provided
     const run = await prisma.run.create({
       data: {
         projectId,
         status: 'PENDING',
+        clarifications: clarifications ? (clarifications as Prisma.InputJsonValue) : undefined,
       },
     });
 
@@ -54,11 +56,13 @@ export async function POST(request: NextRequest) {
       runId: run.id,
       projectId: project.id,
       projectTitle: project.title,
+      hasClarifications: !!clarifications,
+      clarifierSessionId,
     });
 
     // Start pipeline asynchronously (don't await)
     console.log('🚀 [RUNS] Starting pipeline execution asynchronously...');
-    executePipeline(run.id, project).catch((error) => {
+    executePipeline(run.id, project, clarifications).catch((error) => {
       console.error('❌ [RUNS] Pipeline execution failed:', error);
       console.error('Stack trace:', error.stack);
     });
@@ -79,22 +83,39 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function executePipeline(runId: string, project: PipelineProject) {
+async function executePipeline(
+  runId: string,
+  project: PipelineProject,
+  providedClarifications?: Clarifications
+) {
   const startTime = Date.now();
 
   console.log('🔄 [PIPELINE] Starting execution:', {
     runId,
     projectId: project.id,
     projectTitle: project.title,
+    hasProvidedClarifications: !!providedClarifications,
   });
 
   try {
-    // Update status to CLARIFYING
-    console.log('📝 [PIPELINE] Updating status to CLARIFYING...');
-    await prisma.run.update({
-      where: { id: runId },
-      data: { status: 'CLARIFYING' },
-    });
+    // If clarifications are provided, skip CLARIFYING status and go straight to DRAFTING_HLD
+    if (providedClarifications) {
+      console.log('📝 [PIPELINE] Using provided clarifications, skipping clarifier node...');
+      await prisma.run.update({
+        where: { id: runId },
+        data: {
+          status: 'DRAFTING_HLD',
+          clarifications: providedClarifications as Prisma.InputJsonValue,
+        },
+      });
+    } else {
+      // Update status to CLARIFYING
+      console.log('📝 [PIPELINE] Updating status to CLARIFYING...');
+      await prisma.run.update({
+        where: { id: runId },
+        data: { status: 'CLARIFYING' },
+      });
+    }
 
     console.log('🏗️ [PIPELINE] Creating LangGraph pipeline...');
     const pipeline = createPipeline();
@@ -112,6 +133,7 @@ async function executePipeline(runId: string, project: PipelineProject) {
       title: project.title,
       problem: project.problem,
       constraints: project.constraints || '',
+      clarifications: providedClarifications || undefined,
       currentStep: 'PENDING',
       errors: [] as string[],
       tokensUsed: 0,

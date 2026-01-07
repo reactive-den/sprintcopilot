@@ -43,26 +43,8 @@ export function ProjectForm() {
       return response.json();
     },
     onSuccess: async (data) => {
-      try {
-        // Create a run immediately
-        const runResponse = await fetch('/api/runs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ projectId: data.project.id }),
-        });
-
-        if (!runResponse.ok) {
-          const errorData = await runResponse.json();
-          throw new Error(errorData.error || 'Failed to start pipeline');
-        }
-
-        const runData = await runResponse.json();
-        router.push(`/projects/${data.project.id}?runId=${runData.run.id}`);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to start pipeline');
-        // Still navigate to project page even if run creation fails
-        router.push(`/projects/${data.project.id}`);
-      }
+      // Redirect to clarifier chat instead of directly creating a run
+      router.push(`/projects/${data.project.id}/clarify`);
     },
     onError: (error: Error) => {
       setError(error.message);
