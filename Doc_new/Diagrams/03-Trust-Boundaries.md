@@ -6,5 +6,5 @@
      -> [Service Mesh] (mTLS, service identity)
         -> [Datastores]
   -> [Tracker Desktop Agent] (mutual auth, signed payloads)
-  -> [Third-party APIs] (Jira/ClickUp, LLM providers)
+  -> [Third-party APIs] (Jira/ClickUp, GitHub, LLM providers)
 ```

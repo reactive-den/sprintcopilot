@@ -18,4 +18,10 @@
    |                                                                                                     +--(AssignmentsReady)--> [Tracker Service]
    |
    +--> [Tracker Service] <-> [Object Storage]
+   |
+   +--> [RepoIngestor Service] --(RepoSyncCompleted)--> [RepoAnalyzer Service]
+   |                                      |
+   |                                      +--(SprintProposalCreated)--> [Ticket Slicer Service]
+   |
+   +--> [OwnerBot Service] --(OwnerQueryExecuted)--> [Owner Responses]
 ```

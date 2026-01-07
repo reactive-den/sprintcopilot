@@ -14,3 +14,17 @@
 3) Agent sends activity events and screenshots.
 4) Tracker Service stores and aggregates events.
 5) Reporting engine generates reports and exposes via API.
+
+## Flow C: Owner Bot -> Progress Answer
+1) Owner posts query via API Gateway.
+2) OwnerBot validates RBAC and consent scopes.
+3) OwnerBot reads progress read model (or queries services directly).
+4) OwnerBot emits OwnerQueryExecuted and OwnerQueryResponseGenerated.
+5) Response includes evidence and redactions.
+
+## Flow D: Repo -> Insights -> Sprint Proposal
+1) Owner connects GitHub repo via RepoIngestor.
+2) RepoIngestor processes webhooks and sync jobs, emits RepoSyncCompleted.
+3) RepoAnalyzer runs analysis workflow and emits RepoInsightGenerated.
+4) RepoAnalyzer drafts SprintProposalCreated and waits for approval.
+5) On approval, tickets and assignments are created and downstream tracking begins.

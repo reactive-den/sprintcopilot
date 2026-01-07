@@ -12,6 +12,9 @@
 - Ticket Slicer Service: ticket_job, ticket_set, ticket_item, integration_account.
 - Estimator Service: estimate_job, estimate_item, developer_profile, assignment_item.
 - Tracker Service: tracker_session, tracker_event, screenshot, policy, consent_record.
+- OwnerBot Service: owner_query, owner_query_result, progress_read_model_*.
+- RepoIngestor Service: repo_connection, repo_installation, repo_webhook_event, repo_sync_checkpoint.
+- RepoAnalyzer Service: repo_analysis_job, repo_insight, sprint_proposal.
 
 ## Technology choices and rationale
 - Decision: AWS as primary cloud with EKS, RDS Postgres, MSK, S3, KMS.
@@ -37,6 +40,7 @@
 - Event Bus: Kafka with schema registry and DLQ topics.
 - Job Queue: Temporal task queues per workflow.
 - Storage: S3 for documents and screenshots; Redis for caching and rate limits.
+- Read models: event-driven projections for fast, auditable queries.
 - Observability: OpenTelemetry, Prometheus, Grafana, centralized logs, alerting.
 
 ## Multi-tenancy model
@@ -44,3 +48,4 @@
 - Decision: Per-tenant encryption keys for sensitive data (envelope encryption with KMS).
 - Trade-off: Shared DB simplifies operations but requires strict policy enforcement.
 - Why: Balances cost with strong logical isolation; supports enterprise migration to dedicated DBs.
+- Decision: GitHub App installations are bound to a tenant and scoped to approved repos.

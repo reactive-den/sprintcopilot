@@ -9,6 +9,7 @@
 
 ## Secrets management
 - Secrets in Secrets Manager; no secrets in code.
+- GitHub App private keys stored in Secrets Manager with rotation.
 
 ## Migrations
 - Backward-compatible migrations first.

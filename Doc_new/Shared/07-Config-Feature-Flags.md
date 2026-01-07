@@ -8,3 +8,4 @@
 - Flags for experimental pipelines and model versions.
 - Gradual rollout by tenant or user segment.
 - Rollback on error budget breach.
+- Flags to enable Owner Bot and repo analysis per tenant and role.

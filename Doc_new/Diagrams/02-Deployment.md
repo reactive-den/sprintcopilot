@@ -12,6 +12,9 @@
     - tickets
     - estimator
     - tracker
+    - ownerbot
+    - repo-ingestor
+    - repo-analyzer
   - Namespace: observability
     - otel-collector
     - prometheus

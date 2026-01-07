@@ -14,6 +14,11 @@ See `Doc_new/Shared/03-Auth-RBAC.md`.
 - Tenant_id extracted from JWT and set in DB session via SET LOCAL.
 - Sensitive artifacts encrypted with tenant-specific data keys.
 
+## Consent-aware data access
+- Owner Bot must enforce consent scopes for time and activity visibility.
+- Deny-by-default if consent is missing or revoked.
+- Query results include redactions and evidence references.
+
 ## AI/LLM gateway
 - Prompt registry with semantic versioning: clarifier.v3, hld.v2.
 - Output schemas enforced by JSON Schema + runtime validation.
@@ -44,6 +49,7 @@ See `Doc_new/Shared/05-Observability.md`.
 - Encryption at rest (KMS) for all sensitive data.
 - Audit logs for admin actions and policy changes.
 - Consent records immutable and versioned.
+- GitHub integration uses app-based auth with least-privilege scopes and signed webhooks.
 
 See `Doc_new/Shared/06-Security-Compliance.md`.
 

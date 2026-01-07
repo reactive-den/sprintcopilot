@@ -4,6 +4,8 @@
 - API Gateway p95 latency < 300ms for non-LLM endpoints.
 - LLM pipeline end-to-end < 90 seconds for standard ideas.
 - Tracker screenshot upload p95 < 5 seconds.
+- Owner Bot query response p95 < 2 seconds for cached read model queries.
+- Repo analysis workflow target < 10 minutes for mid-size repos (default sync).
 
 ## Scalability assumptions
 - Assumption: 500 tenants, 50,000 monthly active users.
@@ -12,6 +14,7 @@
 ## Availability targets
 - 99.9% for core APIs.
 - 99.5% for LLM-dependent workflows.
+- 99.0% for repo analysis workflows (batch and retry-friendly).
 
 ## Cost considerations
 - Token usage capped per tenant with quotas.
@@ -20,3 +23,4 @@
 ## Data retention
 - Assumption: screenshots retained for 90 days by default.
 - Assumption: docs retained for 2 years.
+- Assumption: repo metadata retained for 180 days unless tenant overrides.

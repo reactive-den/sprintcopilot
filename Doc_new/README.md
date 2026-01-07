@@ -23,6 +23,9 @@ Doc_new/
     Estimator/
     Tracker/
     Tracker-Agent/
+    OwnerBot/
+    RepoIngestor/
+    RepoAnalyzer/
   Shared/
 ```
 

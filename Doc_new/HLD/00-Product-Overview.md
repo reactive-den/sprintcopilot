@@ -4,6 +4,7 @@
 - Convert raw business ideas into validated, structured engineering artifacts in minutes.
 - Provide end-to-end traceability from idea -> architecture -> tickets -> assignment -> time tracking.
 - Deliver a multi-tenant SaaS with auditable, consent-based tracking and compliance controls.
+- Add owner-facing insights and repo-driven sprint generation with review-first controls.
 
 ## Target personas
 - Founder or PM: wants fast scope, risks, and a credible execution plan.
@@ -23,6 +24,10 @@
 - Policy: Tracking and retention rules.
 - Consent Record: immutable acceptance of a policy version.
 - Tracker Session: time-window of activity tracking.
+- Owner Query: a progress question asked by an Owner/Manager.
+- Repo Connection: a tenant-linked GitHub App installation for a repo.
+- Repo Insight: grounded findings derived from repo artifacts and CI signals.
+- Sprint Proposal: reviewable backlog derived from repo signals.
 
 ## Primary user journeys
 1) Idea to BDD
@@ -45,6 +50,14 @@
    - Input: assignment set and developer consent.
    - Agent captures activity and screenshots per policy.
    - Output: activity reports linked to tickets.
+6) Owner progress query
+   - Input: owner question (developer/sprint/time range).
+   - Owner Bot validates RBAC + consent scopes and returns an auditable answer.
+   - Output: summary with evidence, redactions, and referenced artifacts.
+7) Repo to sprint proposal
+   - Input: GitHub repo connection.
+   - Repo Ingestor syncs issues/PRs/CI signals into events.
+   - Repo Analyzer drafts findings, tickets, estimates, and assignments for approval.
 
 ## Non-goals
 - Replacing full project management or HR suites.
