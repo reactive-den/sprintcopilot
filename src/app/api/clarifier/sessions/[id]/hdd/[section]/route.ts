@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 import { generateHDDSection, type HDDSection } from '@/lib/hdd-generator';
+import type { RepoAnalysis } from '@/types';
 
 export async function GET(
   request: NextRequest,
@@ -113,6 +114,13 @@ export async function POST(
         }
       | undefined;
 
+    const latestRun = await prisma.run.findFirst({
+      where: { projectId: fullSession.projectId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const repoAnalysis = latestRun?.repoAnalysis as RepoAnalysis | undefined;
+
     // Generate HDD section
     console.log(`📋 [HDD] Generating ${section} for project ${fullSession.projectId} and session:`, id);
     const content = await generateHDDSection(section as HDDSection, {
@@ -124,11 +132,22 @@ export async function POST(
       dataFlows: businessDocument?.dataFlows,
       stakeholders: businessDocument?.stakeholders,
       productOverview: businessDocument?.productOverview,
+      repoAnalysis,
     });
 
-    // Save to database with projectId
-    await prisma.hDDDocument.create({
-      data: {
+    // Save to database with projectId (use upsert to avoid unique constraint races)
+    await prisma.hDDDocument.upsert({
+      where: {
+        sessionId_section: {
+          sessionId: id,
+          section: section,
+        },
+      },
+      update: {
+        content: content,
+        projectId: fullSession.projectId,
+      },
+      create: {
         sessionId: id,
         projectId: fullSession.projectId,
         section: section,

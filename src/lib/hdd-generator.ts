@@ -1,5 +1,7 @@
 import { llm } from './llm';
 import { retryWithBackoff } from './errors';
+import type { RepoAnalysis } from '@/types';
+import { formatRepoAnalysisForPrompt } from './repo-analyzer';
 
 export type HDDSection = 'architecture' | 'deployment' | 'dataflow' | 'users';
 
@@ -11,6 +13,7 @@ Project Title: {idea}
 Problem Statement: {context}
 Constraints: {constraints}
 System Design: {systemDesign}
+Repo Analysis: {repoAnalysis}
 
 Generate a detailed architecture document covering:
 - System Architecture Overview
@@ -34,6 +37,7 @@ Project Title: {idea}
 Problem Statement: {context}
 Constraints: {constraints}
 Deployment Strategy: {deployment}
+Repo Analysis: {repoAnalysis}
 
 Generate a detailed deployment document covering:
 - Deployment Architecture
@@ -57,6 +61,7 @@ Project Title: {idea}
 Problem Statement: {context}
 Constraints: {constraints}
 Data Flows: {dataFlows}
+Repo Analysis: {repoAnalysis}
 
 Generate a detailed data flow document covering:
 - Data Flow Overview
@@ -81,6 +86,7 @@ Problem Statement: {context}
 Constraints: {constraints}
 Stakeholders: {stakeholders}
 Product Overview: {productOverview}
+Repo Analysis: {repoAnalysis}
 
 Generate a detailed user documentation covering:
 - User Personas
@@ -109,6 +115,7 @@ export async function generateHDDSection(
     dataFlows?: string[];
     stakeholders?: string[];
     productOverview?: string;
+    repoAnalysis?: RepoAnalysis;
   }
 ): Promise<string> {
   const prompt = HDD_PROMPTS[section]
@@ -129,7 +136,8 @@ export async function generateHDDSection(
         ? context.stakeholders.join(', ')
         : 'Not specified'
     )
-    .replace('{productOverview}', context.productOverview || 'Not specified');
+    .replace('{productOverview}', context.productOverview || 'Not specified')
+    .replace('{repoAnalysis}', formatRepoAnalysisForPrompt(context.repoAnalysis));
 
   try {
     const response = await retryWithBackoff(async () => {

@@ -22,6 +22,7 @@ Feature: {title}
 Scope: {scope}
 Problem: {problem}
 Constraints: {constraints}
+Repo Analysis: {repoAnalysis}
 
 Create a mini-HLD with:
 1. Key modules/components (3-7 items) - describe each briefly
@@ -35,6 +36,40 @@ Return ONLY valid JSON in this exact format:
   "dataFlows": ["Flow 1: Component A -> Component B via REST API", "Flow 2: ..."],
   "risks": ["Risk 1: Description and mitigation", "Risk 2: ..."],
   "nfrs": ["NFR 1: Performance requirement", "NFR 2: Security requirement"]
+}`;
+
+export const REPO_ANALYSIS_PROMPT = `You are a senior engineer analyzing a GitHub repository to inform system design documentation.
+
+Business context:
+Feature: {title}
+Scope: {scope}
+Problem: {problem}
+Constraints: {constraints}
+
+Repository snapshot (facts only, may be partial):
+{repoSnapshot}
+
+Your task:
+1. Provide a brief summary of the repo and what it appears to do.
+2. Explain where the code aligns with the business idea.
+3. Call out gaps or missing pieces relative to the business idea.
+4. Identify areas of potential over-engineering.
+5. Comment on coding practices (strengths and weaknesses).
+6. Highlight design or technical risks.
+7. Provide practical recommendations for the HLD/LLD documentation.
+
+Return ONLY valid JSON in this exact format:
+{
+  "summary": "Short summary (2-4 sentences).",
+  "alignment": ["Alignment 1", "Alignment 2"],
+  "gaps": ["Gap 1", "Gap 2"],
+  "overEngineering": ["Area 1", "Area 2"],
+  "codingPractices": {
+    "strengths": ["Strength 1", "Strength 2"],
+    "weaknesses": ["Weakness 1", "Weakness 2"]
+  },
+  "risks": ["Risk 1", "Risk 2"],
+  "recommendations": ["Recommendation 1", "Recommendation 2"]
 }`;
 
 export const TICKET_SLICER_PROMPT = `You are a senior product manager breaking down features into user stories.

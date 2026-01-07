@@ -1,5 +1,5 @@
 import { Annotation } from '@langchain/langgraph';
-import type { Clarifications, HLD, RawTicket, EstimatedTicket, FinalTicket } from '@/types';
+import type { Clarifications, HLD, RawTicket, EstimatedTicket, FinalTicket, RepoAnalysis } from '@/types';
 
 export const GraphState = Annotation.Root({
   // Input
@@ -7,12 +7,14 @@ export const GraphState = Annotation.Root({
   title: Annotation<string>,
   problem: Annotation<string>,
   constraints: Annotation<string | undefined>,
+  repoUrl: Annotation<string | undefined>,
 
   // Clarifier outputs
   clarifications: Annotation<Clarifications | undefined>,
 
   // HLD outputs
   hld: Annotation<HLD | undefined>,
+  repoAnalysis: Annotation<RepoAnalysis | undefined>,
 
   // Ticket slicer outputs
   rawTickets: Annotation<RawTicket[] | undefined>,

@@ -2,6 +2,7 @@ import { llm } from '@/lib/llm';
 import { HLD_PROMPT } from '../prompts';
 import type { GraphStateType } from '../state';
 import { retryWithBackoff } from '@/lib/errors';
+import { formatRepoAnalysisForPrompt } from '@/lib/repo-analyzer';
 
 export async function hldDrafterNode(state: GraphStateType): Promise<Partial<GraphStateType>> {
   if (!state.clarifications) {
@@ -14,7 +15,8 @@ export async function hldDrafterNode(state: GraphStateType): Promise<Partial<Gra
   const prompt = HLD_PROMPT.replace('{title}', state.title)
     .replace('{scope}', state.clarifications.scope || 'Not specified')
     .replace('{problem}', state.problem)
-    .replace('{constraints}', state.constraints || 'None');
+    .replace('{constraints}', state.constraints || 'None')
+    .replace('{repoAnalysis}', formatRepoAnalysisForPrompt(state.repoAnalysis));
 
   try {
     const response = await retryWithBackoff(async () => {

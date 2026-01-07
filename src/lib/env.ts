@@ -41,6 +41,9 @@ const envSchema = z.object({
   CLICKUP_API_TOKEN: z.string().optional().or(z.literal('')),
   CLICKUP_LIST_ID: z.string().optional().or(z.literal('')),
 
+  // GitHub Configuration (Optional)
+  GITHUB_TOKEN: z.string().optional().or(z.literal('')),
+
   // Application Configuration
   MAX_FEATURE_LENGTH: z
     .string()

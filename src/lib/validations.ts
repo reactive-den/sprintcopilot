@@ -24,6 +24,7 @@ export const createRunSchema = z.object({
 export const runStatusSchema = z.enum([
   'PENDING',
   'CLARIFYING',
+  'ANALYZING_REPO',
   'DRAFTING_HLD',
   'SLICING_TICKETS',
   'ESTIMATING',

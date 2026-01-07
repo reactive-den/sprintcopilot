@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import type { Clarifications, HLD, Ticket } from '@/types';
+import type { Clarifications, HLD, RepoAnalysis, Ticket } from '@/types';
 
 interface Project {
   id: string;
   title: string;
   problem: string;
   constraints?: string;
+  repoUrl?: string | null;
   createdAt: string;
   runs: Run[];
 }
@@ -15,6 +16,7 @@ interface Run {
   status: string;
   clarifications?: Clarifications;
   hld?: HLD;
+  repoAnalysis?: RepoAnalysis;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;

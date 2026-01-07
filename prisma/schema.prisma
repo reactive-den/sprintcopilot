@@ -25,6 +25,7 @@ model Project {
   title             String
   problem           String              @db.Text
   constraints       String?             @db.Text
+  repoUrl           String?             @db.Text
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   runs              Run[]
@@ -42,6 +43,7 @@ model Run {
   status          RunStatus @default(PENDING)
   clarifications  Json?
   hld             Json?
+  repoAnalysis    Json?
   summary         String?   @db.Text
   errorMessage    String?   @db.Text
   tokensUsed      Int       @default(0)
@@ -146,6 +148,7 @@ model HDDDocument {
 enum RunStatus {
   PENDING
   CLARIFYING
+  ANALYZING_REPO
   DRAFTING_HLD
   SLICING_TICKETS
   ESTIMATING

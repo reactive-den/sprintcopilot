@@ -10,6 +10,7 @@ export interface Project {
   title: string;
   problem: string;
   constraints: string | null;
+  repoUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
   userId: string | null;
@@ -23,6 +24,7 @@ export interface PipelineProject {
   title: string;
   problem: string;
   constraints: string | null;
+  repoUrl?: string | null;
 }
 
 // ============================================================================
@@ -50,6 +52,32 @@ export interface HLD {
   risks?: string[];
   nfrs?: string[];
   [key: string]: string[] | undefined;
+}
+
+/**
+ * Repo analysis generated before HLD/LLD drafting
+ */
+export interface RepoAnalysis {
+  status: 'available' | 'skipped' | 'failed';
+  repoUrl?: string;
+  repoName?: string;
+  summary?: string;
+  alignment?: string[];
+  gaps?: string[];
+  overEngineering?: string[];
+  codingPractices?: {
+    strengths: string[];
+    weaknesses: string[];
+  };
+  risks?: string[];
+  recommendations?: string[];
+  evidence?: {
+    languages?: Record<string, number>;
+    topLevel?: string[];
+    recentCommits?: string[];
+    readmeExcerpt?: string;
+  };
+  message?: string;
 }
 
 /**
@@ -127,6 +155,7 @@ export interface Run {
   status: string;
   clarifications?: Clarifications;
   hld?: HLD;
+  repoAnalysis?: RepoAnalysis;
   tokensUsed: number;
   durationMs: number | null;
   errorMessage: string | null;

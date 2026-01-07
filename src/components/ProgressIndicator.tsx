@@ -10,26 +10,29 @@ interface ProgressIndicatorProps {
 const PIPELINE_STEPS = [
   { key: 'PENDING', label: 'Initializing', icon: '⏳', order: 0, color: 'from-indigo-500 to-purple-500' },
   { key: 'CLARIFYING', label: 'Clarifying Requirements', icon: '🎯', order: 1, color: 'from-indigo-500 to-purple-500' },
-  { key: 'DRAFTING_HLD', label: 'Drafting High-Level Design', icon: '🏗️', order: 2, color: 'from-purple-500 to-pink-500' },
-  { key: 'SLICING_TICKETS', label: 'Creating User Stories', icon: '✂️', order: 3, color: 'from-purple-500 to-pink-500' },
-  { key: 'ESTIMATING', label: 'Estimating Effort', icon: '📊', order: 4, color: 'from-pink-500 to-red-500' },
-  { key: 'PRIORITIZING', label: 'Prioritizing & Scheduling', icon: '🎨', order: 5, color: 'from-pink-500 to-red-500' },
+  { key: 'ANALYZING_REPO', label: 'Analyzing Repository', icon: '🔍', order: 2, color: 'from-purple-500 to-pink-500' },
+  { key: 'DRAFTING_HLD', label: 'Drafting High-Level Design', icon: '🏗️', order: 3, color: 'from-purple-500 to-pink-500' },
+  { key: 'SLICING_TICKETS', label: 'Creating User Stories', icon: '✂️', order: 4, color: 'from-purple-500 to-pink-500' },
+  { key: 'ESTIMATING', label: 'Estimating Effort', icon: '📊', order: 5, color: 'from-pink-500 to-red-500' },
+  { key: 'PRIORITIZING', label: 'Prioritizing & Scheduling', icon: '🎨', order: 6, color: 'from-pink-500 to-red-500' },
 ] as const;
 
 const STATUS_TO_ORDER: Record<string, number> = {
   PENDING: 0,
   CLARIFYING: 1,
-  DRAFTING_HLD: 2,
-  SLICING_TICKETS: 3,
-  ESTIMATING: 4,
-  PRIORITIZING: 5,
-  COMPLETED: 6,
-  FAILED: 6,
+  ANALYZING_REPO: 2,
+  DRAFTING_HLD: 3,
+  SLICING_TICKETS: 4,
+  ESTIMATING: 5,
+  PRIORITIZING: 6,
+  COMPLETED: 7,
+  FAILED: 7,
 };
 
 const MOTIVATIONAL_MESSAGES = [
   "✨ Crafting your perfect sprint plan...",
   "🚀 Analyzing requirements with AI precision...",
+  "🔍 Reading the repo to ground the design...",
   "🎯 Breaking down complex features...",
   "💡 Generating intelligent estimates...",
   "🎨 Organizing priorities for maximum impact...",
@@ -39,10 +42,11 @@ const MOTIVATIONAL_MESSAGES = [
 const STATUS_PROGRESS: Record<string, { min: number; max: number; durationMs: number }> = {
   PENDING: { min: 2, max: 12, durationMs: 7000 },
   CLARIFYING: { min: 12, max: 30, durationMs: 14000 },
-  DRAFTING_HLD: { min: 30, max: 50, durationMs: 16000 },
-  SLICING_TICKETS: { min: 50, max: 70, durationMs: 16000 },
-  ESTIMATING: { min: 70, max: 84, durationMs: 14000 },
-  PRIORITIZING: { min: 84, max: 95, durationMs: 12000 },
+  ANALYZING_REPO: { min: 30, max: 45, durationMs: 12000 },
+  DRAFTING_HLD: { min: 45, max: 62, durationMs: 16000 },
+  SLICING_TICKETS: { min: 62, max: 78, durationMs: 16000 },
+  ESTIMATING: { min: 78, max: 88, durationMs: 14000 },
+  PRIORITIZING: { min: 88, max: 95, durationMs: 12000 },
 };
 
 export function ProgressIndicator({ status, className = '' }: ProgressIndicatorProps) {
@@ -239,7 +243,7 @@ export function ProgressIndicator({ status, className = '' }: ProgressIndicatorP
         </div>
 
         {/* Pipeline Steps Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {PIPELINE_STEPS.map((step, index) => {
             const isCompleted = step.order < currentOrder;
             const isCurrent = step.key === status;

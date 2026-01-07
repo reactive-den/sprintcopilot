@@ -25,17 +25,18 @@ const AI_RESPONSE_PROMPT = `You are a friendly product manager conducting a clar
 Original Feature: {idea}
 Context: {context}
 Constraints: {constraints}
+Repo URL: {repoUrl}
 
 Conversation History:
 {conversation}
 
-Question Count: Count how many questions you've asked so far. You can ask a maximum of 10 questions total.
+Question Count: Count how many questions you've asked so far. You can ask a maximum of 5 questions total.
 
 The user just responded. Based on their answer:
 
 1. **Acknowledge briefly** (one short sentence)
 2. **Ask the next question:**
-   - If you've asked 10 questions already, thank them and say you have enough information to proceed
+   - If you've asked 5 questions already, thank them and say you have enough information to proceed
    - Otherwise, ask ONE short, simple question (max 15 words)
    - Move to a new topic if the previous one is clear
 
@@ -44,7 +45,8 @@ The user just responded. Based on their answer:
 - Use SIMPLE language (avoid technical terms)
 - Ask ONE question at a time
 - Cover: users, what it does, when needed, who benefits, success looks like
-- After 10 questions, stop asking and thank them
+- If a repo URL is already provided, do NOT ask for it again
+- After 5 questions, stop asking and thank them
 
 Your response should be: [Brief acknowledgment] + [One short question OR closing statement if at 10 questions]
 Keep total response under 3 sentences.`;
@@ -101,6 +103,7 @@ export async function generateAIResponse(
     idea: string;
     context: string | null;
     constraints: string | null;
+    repoUrl?: string | null;
     messages: Array<{ role: string; content: string }>;
   },
   userMessage: string
@@ -115,6 +118,7 @@ export async function generateAIResponse(
   const prompt = AI_RESPONSE_PROMPT.replace('{idea}', session.idea)
     .replace('{context}', session.context || 'Not specified')
     .replace('{constraints}', session.constraints || 'None')
+    .replace('{repoUrl}', session.repoUrl || 'Not provided')
     .replace('{conversation}', conversation);
 
   try {

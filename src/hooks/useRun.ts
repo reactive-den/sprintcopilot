@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Clarifications, HLD, Ticket } from '@/types';
+import type { Clarifications, HLD, RepoAnalysis, Ticket } from '@/types';
 
 interface CreateRunInput {
   projectId: string;
@@ -11,6 +11,7 @@ interface Run {
   status: string;
   clarifications?: Clarifications;
   hld?: HLD;
+  repoAnalysis?: RepoAnalysis;
   tokensUsed: number;
   durationMs?: number;
   errorMessage?: string;
@@ -21,6 +22,7 @@ interface Run {
     title: string;
     problem: string;
     constraints?: string;
+    repoUrl?: string | null;
   };
 }
 

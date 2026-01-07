@@ -1,13 +1,15 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useRun } from '@/hooks/useRun';
+import { useProject } from '@/hooks/useProject';
 import { useExport } from '@/hooks/useExport';
 import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { ClarificationsCard } from '@/components/ClarificationsCard';
 import { HLDCard } from '@/components/HLDCard';
 import { TicketsTable } from '@/components/TicketsTable';
+import { RepoAnalysisCard } from '@/components/RepoAnalysisCard';
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
@@ -17,15 +19,23 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const [activeRunId, setActiveRunId] = useState(runId);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
+  const { data: project, isLoading: isProjectLoading } = useProject(projectId);
   const { data: run, isLoading, error } = useRun(activeRunId || undefined);
   const { exportCSV, createClickUpTasks, isExporting, exportError } = useExport();
-  const [isEstimating, setIsEstimating] = useState(false);
+  const repoSectionRef = useRef<HTMLDivElement | null>(null);
+  const [showRepoDetails, setShowRepoDetails] = useState(false);
 
   useEffect(() => {
     if (runId && !activeRunId) {
       setActiveRunId(runId);
     }
   }, [runId, activeRunId]);
+
+  useEffect(() => {
+    if (!activeRunId && project?.runs?.length) {
+      setActiveRunId(project.runs[0].id);
+    }
+  }, [activeRunId, project]);
 
   // Load latest session for business document
   useEffect(() => {
@@ -76,7 +86,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     }
   };
 
-  if (isLoading) {
+  if (isProjectLoading || (isLoading && activeRunId)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">
@@ -85,6 +95,26 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
             <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
           </div>
           <p className="text-xl font-semibold text-gray-700">Loading your project...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeRunId && project && project.runs.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center">
+          <div className="text-6xl mb-4">🧭</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No runs yet</h2>
+          <p className="text-gray-600 mb-6">
+            Start a clarifier session to generate your first repo analysis and HLD.
+          </p>
+          <button
+            onClick={() => router.push(`/projects/${projectId}/clarify`)}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold"
+          >
+            Start Clarifier
+          </button>
         </div>
       </div>
     );
@@ -158,6 +188,18 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                     <span>View Business Document</span>
                   </button>
                 )}
+                {run.repoAnalysis && (
+                  <button
+                    onClick={() => {
+                      setShowRepoDetails(true);
+                      repoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    <span>🧭</span>
+                    <span>View Repo Analysis</span>
+                  </button>
+                )}
                 <button
                   onClick={() => exportCSV(run.id, run.project.title)}
                   disabled={isExporting}
@@ -215,6 +257,18 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
         {/* Clarifications Card */}
         {run.clarifications && <ClarificationsCard clarifications={run.clarifications} className="mb-8" />}
+
+        {/* Repo Analysis Card */}
+        {run.repoAnalysis && (
+          <div ref={repoSectionRef}>
+            <RepoAnalysisCard
+              repoAnalysis={run.repoAnalysis}
+              className="mb-8"
+              isOpen={showRepoDetails}
+              onToggle={() => setShowRepoDetails((prev) => !prev)}
+            />
+          </div>
+        )}
 
         {/* HLD Card */}
         {run.hld && <HLDCard hld={run.hld} className="mb-8" />}

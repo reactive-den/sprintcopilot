@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 import { z } from 'zod';
+import { parseGitHubRepoUrl } from '@/lib/repo-analyzer';
 
 const sendMessageSchema = z.object({
   content: z.string().min(1),
@@ -66,7 +67,7 @@ export async function POST(
 
     // Check question limit (count assistant messages)
     const questionCount = session.messages.filter((msg) => msg.role === 'assistant').length;
-    const maxQuestions = 10;
+    const maxQuestions = 5;
     if (questionCount >= maxQuestions) {
       return NextResponse.json(
         { error: 'Maximum number of questions (10) has been reached. Please finalize the session.' },
@@ -83,9 +84,36 @@ export async function POST(
       },
     });
 
+    const project = await prisma.project.findUnique({
+      where: { id: session.projectId },
+    });
+
+    let updatedRepoUrl = project?.repoUrl ?? null;
+    if (!updatedRepoUrl) {
+      const parsedRepo = parseGitHubRepoUrl(content);
+      if (parsedRepo) {
+        await prisma.project.update({
+          where: { id: session.projectId },
+          data: { repoUrl: parsedRepo.url },
+        });
+        updatedRepoUrl = parsedRepo.url;
+      } else if (/no repo|no repository|none|n\/a/i.test(content)) {
+        updatedRepoUrl = 'No repo provided';
+      }
+    }
+
     // Generate AI response based on conversation
     const { generateAIResponse } = await import('@/lib/clarifier');
-    const aiResponse = await generateAIResponse(session, content);
+    const aiResponse = await generateAIResponse(
+      {
+        idea: session.idea,
+        context: session.context,
+        constraints: session.constraints,
+        repoUrl: updatedRepoUrl,
+        messages: session.messages,
+      },
+      content
+    );
 
     // Save AI response
     const assistantMessage = await prisma.clarifierMessage.create({
