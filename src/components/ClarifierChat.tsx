@@ -21,6 +21,7 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [isGeneratingDocument, setIsGeneratingDocument] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -29,6 +30,27 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
   const questionCount = messages.filter((msg) => msg.role === 'assistant').length;
   const maxQuestions = 10;
   const isQuestionLimitReached = questionCount >= maxQuestions;
+
+  // Auto-generate document and redirect when question limit is reached
+  useEffect(() => {
+    if (questionCount >= maxQuestions && messages.length > 0 && !isLoading) {
+      const generateAndRedirect = async () => {
+        try {
+          const docResponse = await fetch(
+            `/api/clarifier/sessions/${sessionId}/business-document`,
+            { method: 'POST' }
+          );
+          if (docResponse.ok) {
+            // Redirect to business document page
+            router.push(`/projects/${projectId}/business-document/${sessionId}`);
+          }
+        } catch (error) {
+          console.error('Failed to generate business document:', error);
+        }
+      };
+      generateAndRedirect();
+    }
+  }, [questionCount, maxQuestions, messages.length, isLoading, sessionId, projectId, router]);
 
   const loadMessages = useCallback(async () => {
     try {
@@ -87,6 +109,34 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
     } finally {
       setIsLoading(false);
       setShowTyping(false);
+    }
+  };
+
+  const handleGenerateDocument = async () => {
+    if (messages.length < 2) {
+      alert('Please have at least one conversation before generating the document.');
+      return;
+    }
+
+    setIsGeneratingDocument(true);
+
+    try {
+      const response = await fetch(`/api/clarifier/sessions/${sessionId}/business-document`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        // Redirect to business document page
+        router.push(`/projects/${projectId}/business-document/${sessionId}`);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to generate business document');
+      }
+    } catch (error) {
+      console.error('Failed to generate business document:', error);
+      alert('Failed to generate business document. Please try again.');
+    } finally {
+      setIsGeneratingDocument(false);
     }
   };
 
@@ -292,26 +342,45 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
             )}
           </button>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-xs text-gray-400 flex items-center gap-2">
-            {isQuestionLimitReached ? (
-              <>
-                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                <span>
-                  Question limit reached ({questionCount}/{maxQuestions})
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <span>AI is ready to help</span>
-              </>
-            )}
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-gray-400 flex items-center gap-2">
+              {isQuestionLimitReached ? (
+                <>
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  <span>
+                    Question limit reached ({questionCount}/{maxQuestions})
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span>AI is ready to help</span>
+                </>
+              )}
+            </div>
+            <button
+              onClick={handleGenerateDocument}
+              disabled={isLoading || isGeneratingDocument || isFinalizing || messages.length < 2}
+              className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-2 text-sm"
+            >
+              {isGeneratingDocument ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <span>📄</span>
+                  <span>Generate Business Document</span>
+                </>
+              )}
+            </button>
           </div>
           <button
             onClick={handleFinalize}
-            disabled={isLoading || isFinalizing || messages.length < 2}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-2"
+            disabled={isLoading || isFinalizing || isGeneratingDocument || messages.length < 2}
+            className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center justify-center gap-2"
           >
             {isFinalizing ? (
               <>

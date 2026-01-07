@@ -29,6 +29,7 @@ model Project {
   updatedAt         DateTime            @updatedAt
   runs              Run[]
   clarifierSessions ClarifierSession[]
+  hddDocuments      HDDDocument[]
   user              User?               @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -94,6 +95,7 @@ model ClarifierSession {
   updatedAt   DateTime            @updatedAt
   messages    ClarifierMessage[]
   bddDocuments BddDocument[]
+  hddDocuments HDDDocument[]
   project     Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
@@ -122,6 +124,23 @@ model BddDocument {
 
   @@index([sessionId])
   @@index([tenantId])
+}
+
+model HDDDocument {
+  id          String            @id @default(uuid())
+  sessionId   String
+  projectId   String
+  section     String            // 'architecture', 'deployment', 'dataflow', 'users'
+  content     String            @db.Text
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  session     ClarifierSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, section])
+  @@index([sessionId])
+  @@index([projectId])
+  @@index([section])
 }
 
 enum RunStatus {
