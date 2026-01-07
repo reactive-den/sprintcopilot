@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Message {
   id: string;
@@ -30,10 +30,22 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
   const maxQuestions = 10;
   const isQuestionLimitReached = questionCount >= maxQuestions;
 
+  const loadMessages = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/clarifier/sessions/${sessionId}/messages`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+    }
+  }, [sessionId]);
+
   // Load messages on mount
   useEffect(() => {
     loadMessages();
-  }, [sessionId]);
+  }, [loadMessages]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -46,18 +58,6 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
       inputRef.current.focus();
     }
   }, [isLoading, messages.length]);
-
-  const loadMessages = async () => {
-    try {
-      const response = await fetch(`/api/clarifier/sessions/${sessionId}/messages`);
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages);
-      }
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-    }
-  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading || isQuestionLimitReached) return;
@@ -75,7 +75,6 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
       });
 
       if (response.ok) {
-        const data = await response.json();
         // Reload messages to get the full conversation
         await loadMessages();
       } else {
@@ -149,7 +148,9 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
             </div>
             <div>
               <h2 className="font-bold text-lg">Feature Clarification</h2>
-              <p className="text-sm text-white/90">Let's understand your requirements together</p>
+              <p className="text-sm text-white/90">
+                Let&apos;s understand your requirements together
+              </p>
             </div>
           </div>
           <div className="text-right">

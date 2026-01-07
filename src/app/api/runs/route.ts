@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { createRunSchema } from '@/lib/validations';
-import { createPipeline } from '@/lib/langgraph/pipeline';
-import { checkRateLimit } from '@/lib/rate-limit';
 import { handleApiError, NotFoundError } from '@/lib/errors';
-import type { PipelineProject, PipelineTicket } from '@/types';
+import { createPipeline } from '@/lib/langgraph/pipeline';
+import { prisma } from '@/lib/prisma';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { createRunSchema } from '@/lib/validations';
+import type { Clarifications, PipelineProject, PipelineTicket } from '@/types';
+import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       data: {
         projectId,
         status: 'PENDING',
-        clarifications: clarifications ? (clarifications as unknown) : null,
+        clarifications: clarifications ? (clarifications as Prisma.InputJsonValue) : undefined,
       },
     });
 
@@ -82,7 +83,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function executePipeline(runId: string, project: PipelineProject, providedClarifications?: any) {
+async function executePipeline(
+  runId: string,
+  project: PipelineProject,
+  providedClarifications?: Clarifications
+) {
   const startTime = Date.now();
 
   console.log('🔄 [PIPELINE] Starting execution:', {
@@ -100,7 +105,7 @@ async function executePipeline(runId: string, project: PipelineProject, provided
         where: { id: runId },
         data: {
           status: 'DRAFTING_HLD',
-          clarifications: providedClarifications as unknown,
+          clarifications: providedClarifications as Prisma.InputJsonValue,
         },
       });
     } else {

@@ -1,8 +1,8 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ClarifierChat } from '@/components/ClarifierChat';
+import { useRouter } from 'next/navigation';
+import { use, useCallback, useEffect, useState } from 'react';
 
 export default function ClarifyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
@@ -11,11 +11,7 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    createSession();
-  }, [projectId]);
-
-  const createSession = async () => {
+  const createSession = useCallback(async () => {
     try {
       // Fetch project details
       const projectResponse = await fetch(`/api/projects/${projectId}`);
@@ -48,7 +44,11 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    createSession();
+  }, [createSession]);
 
   if (isLoading) {
     return (
@@ -102,11 +102,13 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
                 <span className="text-2xl">✨</span>
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   Feature Clarification
                 </h1>
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Let's work together to understand your feature requirements. I'll ask you thoughtful questions one at a time to ensure we capture everything needed for your sprint plan.
+                  Let&apos;s work together to understand your feature requirements. I&apos;ll ask
+                  you thoughtful questions one at a time to ensure we capture everything needed for
+                  your sprint plan.
                 </p>
               </div>
             </div>
