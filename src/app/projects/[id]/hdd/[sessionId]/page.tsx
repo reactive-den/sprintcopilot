@@ -2,8 +2,8 @@
 
 'use client';
 
-import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 type HDDSection = 'architecture' | 'deployment' | 'dataflow' | 'users';
@@ -35,6 +35,7 @@ export default function HDDPage({
     dataflow: false,
     users: false,
   });
+  const [isGeneratingTickets, setIsGeneratingTickets] = useState(false);
 
   useEffect(() => {
     loadSection(activeSection);
@@ -49,10 +50,15 @@ export default function HDDPage({
     setLoading((prev) => ({ ...prev, [section]: true }));
 
     try {
-      const response = await fetch(
-        `/api/clarifier/sessions/${sessionId}/hdd/${section}`,
-        { method: 'POST' }
-      );
+      // First try GET to fetch existing, then POST to generate if not found
+      let response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${section}`);
+
+      if (!response.ok && response.status === 404) {
+        // Not found, generate it
+        response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${section}`, {
+          method: 'POST',
+        });
+      }
 
       if (response.ok) {
         const { content: sectionContent } = await response.json();
@@ -95,6 +101,34 @@ export default function HDDPage({
     }
   };
 
+  const handleGenerateTickets = async () => {
+    if (!confirm('Generate tickets based on Business Document, Problem Statement, and HDD?')) {
+      return;
+    }
+
+    setIsGeneratingTickets(true);
+
+    try {
+      const response = await fetch(`/api/clarifier/sessions/${sessionId}/generate-tickets`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const { run } = await response.json();
+        // Redirect to project page with the new run
+        router.push(`/projects/${projectId}?runId=${run.id}`);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to generate tickets');
+      }
+    } catch (error) {
+      console.error('Failed to generate tickets:', error);
+      alert('Failed to generate tickets. Please try again.');
+    } finally {
+      setIsGeneratingTickets(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Header */}
@@ -112,6 +146,23 @@ export default function HDDPage({
               <div className="h-6 w-px bg-gray-300"></div>
               <h1 className="text-2xl font-bold text-gray-900">High-Level Design Document (HDD)</h1>
             </div>
+            <button
+              onClick={handleGenerateTickets}
+              disabled={isGeneratingTickets}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-2"
+            >
+              {isGeneratingTickets ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <span>🎫</span>
+                  <span>Generate Tickets</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>

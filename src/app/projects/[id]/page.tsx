@@ -19,6 +19,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   const { data: run, isLoading, error } = useRun(activeRunId || undefined);
   const { exportCSV, createClickUpTasks, isExporting, exportError } = useExport();
+  const [isEstimating, setIsEstimating] = useState(false);
 
   useEffect(() => {
     if (runId && !activeRunId) {
@@ -43,6 +44,37 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     };
     loadSession();
   }, [projectId]);
+
+  const handleEstimateTickets = async () => {
+    if (!run?.id) return;
+
+    if (!confirm('Estimate all tickets using AI? This will update existing estimates.')) {
+      return;
+    }
+
+    setIsEstimating(true);
+
+    try {
+      const response = await fetch(`/api/runs/${run.id}/estimate`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        const { ticketsUpdated } = await response.json();
+        alert(`Successfully estimated ${ticketsUpdated} tickets!`);
+        // Refresh the run data
+        window.location.reload();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to estimate tickets');
+      }
+    } catch (error) {
+      console.error('Failed to estimate tickets:', error);
+      alert('Failed to estimate tickets. Please try again.');
+    } finally {
+      setIsEstimating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -95,6 +127,27 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           {/* Action Buttons */}
           {run.status === 'COMPLETED' && (
             <>
+              {run.tickets && run.tickets.length > 0 && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleEstimateTickets}
+                    disabled={isEstimating}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-2"
+                  >
+                    {isEstimating ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Estimating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📊</span>
+                        <span>Estimate Tickets</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 {sessionId && (
                   <button

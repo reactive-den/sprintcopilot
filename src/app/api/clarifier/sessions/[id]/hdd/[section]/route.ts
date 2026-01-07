@@ -3,6 +3,49 @@ import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 import { generateHDDSection, type HDDSection } from '@/lib/hdd-generator';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string; section: string }> }
+) {
+  try {
+    const { id, section } = await params;
+
+    if (!['architecture', 'deployment', 'dataflow', 'users'].includes(section)) {
+      return NextResponse.json({ error: 'Invalid section' }, { status: 400 });
+    }
+
+    // Get session to get projectId
+    const session = await prisma.clarifierSession.findUnique({
+      where: { id },
+      select: { projectId: true },
+    });
+
+    if (!session) {
+      throw new NotFoundError('Clarifier session');
+    }
+
+    // Check if HDD document exists in database
+    const existingHDD = await prisma.hDDDocument.findFirst({
+      where: {
+        sessionId: id,
+        projectId: session.projectId,
+        section: section,
+      },
+    });
+
+    if (existingHDD) {
+      return NextResponse.json({ content: existingHDD.content });
+    }
+
+    return NextResponse.json({ error: 'HDD section not found' }, { status: 404 });
+  } catch (error) {
+    const errorResponse = handleApiError(
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return NextResponse.json(errorResponse, { status: errorResponse.statusCode });
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; section: string }> }
