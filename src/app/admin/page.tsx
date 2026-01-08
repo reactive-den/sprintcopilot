@@ -198,23 +198,6 @@ export default function AdminPage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={handleEstimate}
-                disabled={isEstimating || !selectedProjectId}
-                className="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                {isEstimating ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Estimating...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>📊</span>
-                    <span>Estimate</span>
-                  </>
-                )}
-              </button>
-              <button
                 onClick={() => router.push('/')}
                 className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
@@ -317,10 +300,29 @@ export default function AdminPage() {
 
             {/* Tasks Section */}
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span>🎫</span>
-                <span>All Tasks ({tasks.length})</span>
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <span>🎫</span>
+                  <span>All Tasks ({tasks.length})</span>
+                </h2>
+                <button
+                  onClick={handleEstimate}
+                  disabled={isEstimating || !selectedProjectId}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  {isEstimating ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Estimating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📊</span>
+                      <span>Estimate</span>
+                    </>
+                  )}
+                </button>
+              </div>
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="relative w-16 h-16 mb-4">
