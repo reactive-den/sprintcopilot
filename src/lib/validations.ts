@@ -7,6 +7,10 @@ export const createProjectSchema = z.object({
     .min(20, 'Problem statement must be at least 20 characters')
     .max(2000, 'Problem statement too long'),
   constraints: z.string().max(1000, 'Constraints too long').optional(),
+  repoUrl: z
+    .union([z.string().url('Please enter a valid URL'), z.literal(''), z.undefined()])
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
 });
 
 export const clarificationsSchema = z.object({

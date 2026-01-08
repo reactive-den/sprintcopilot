@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { use, useCallback, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface HDDSectionConfig {
@@ -47,10 +47,34 @@ export default function HDDPage({
           } else {
             // Fallback to default sections if none returned
             setSections([
-              { id: 'architecture', label: 'Architecture', icon: '🏗️', type: 'hld', description: 'High-level system architecture' },
-              { id: 'deployment', label: 'Deployment', icon: '🚀', type: 'guide', description: 'Deployment steps' },
-              { id: 'dataflow', label: 'Data Flow', icon: '🔄', type: 'hld', description: 'Data flow diagrams' },
-              { id: 'users', label: 'Users', icon: '👥', type: 'guide', description: 'User documentation' },
+              {
+                id: 'architecture',
+                label: 'Architecture',
+                icon: '🏗️',
+                type: 'hld',
+                description: 'High-level system architecture',
+              },
+              {
+                id: 'deployment',
+                label: 'Deployment',
+                icon: '🚀',
+                type: 'guide',
+                description: 'Deployment steps',
+              },
+              {
+                id: 'dataflow',
+                label: 'Data Flow',
+                icon: '🔄',
+                type: 'hld',
+                description: 'Data flow diagrams',
+              },
+              {
+                id: 'users',
+                label: 'Users',
+                icon: '👥',
+                type: 'guide',
+                description: 'User documentation',
+              },
             ]);
           }
         }
@@ -58,10 +82,34 @@ export default function HDDPage({
         console.error('Failed to fetch sections:', error);
         // Use default sections on error
         setSections([
-          { id: 'architecture', label: 'Architecture', icon: '🏗️', type: 'hld', description: 'High-level system architecture' },
-          { id: 'deployment', label: 'Deployment', icon: '🚀', type: 'guide', description: 'Deployment steps' },
-          { id: 'dataflow', label: 'Data Flow', icon: '🔄', type: 'hld', description: 'Data flow diagrams' },
-          { id: 'users', label: 'Users', icon: '👥', type: 'guide', description: 'User documentation' },
+          {
+            id: 'architecture',
+            label: 'Architecture',
+            icon: '🏗️',
+            type: 'hld',
+            description: 'High-level system architecture',
+          },
+          {
+            id: 'deployment',
+            label: 'Deployment',
+            icon: '🚀',
+            type: 'guide',
+            description: 'Deployment steps',
+          },
+          {
+            id: 'dataflow',
+            label: 'Data Flow',
+            icon: '🔄',
+            type: 'hld',
+            description: 'Data flow diagrams',
+          },
+          {
+            id: 'users',
+            label: 'Users',
+            icon: '👥',
+            type: 'guide',
+            description: 'User documentation',
+          },
         ]);
       } finally {
         setIsLoadingSections(false);
@@ -71,52 +119,61 @@ export default function HDDPage({
     fetchSections();
   }, [sessionId]);
 
-  const loadSection = useCallback(async (sectionId: string) => {
-    if (content[sectionId]) {
-      // Content already loaded in state
-      return;
-    }
-
-    setLoading((prev) => ({ ...prev, [sectionId]: true }));
-
-    try {
-      // First try GET to fetch existing, then POST to generate if not found
-      let response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`);
-
-      if (!response.ok && response.status === 404) {
-        // Not found, generate it
-        response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`, {
-          method: 'POST',
-        });
+  const loadSection = useCallback(
+    async (sectionId: string) => {
+      if (content[sectionId]) {
+        // Content already loaded in state
+        return;
       }
 
-      if (response.ok) {
-        const { content: sectionContent } = await response.json();
-        setContent((prev) => ({ ...prev, [sectionId]: sectionContent }));
-      } else {
-        const error = await response.json();
+      setLoading((prev) => ({ ...prev, [sectionId]: true }));
+
+      try {
+        // First try GET to fetch existing, then POST to generate if not found
+        let response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`);
+
+        if (!response.ok && response.status === 404) {
+          // Not found, generate it
+          response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`, {
+            method: 'POST',
+          });
+        }
+
+        if (response.ok) {
+          const { content: sectionContent } = await response.json();
+          setContent((prev) => ({ ...prev, [sectionId]: sectionContent }));
+        } else {
+          const error = await response.json();
+          setContent((prev) => ({
+            ...prev,
+            [sectionId]: `# Error\n\nFailed to load ${sectionId}: ${
+              error.error || 'Unknown error'
+            }`,
+          }));
+        }
+      } catch (error) {
+        console.error(`Failed to load ${sectionId}:`, error);
         setContent((prev) => ({
           ...prev,
-          [sectionId]: `# Error\n\nFailed to load ${sectionId}: ${error.error || 'Unknown error'}`,
+          [sectionId]: `# Error\n\nFailed to load ${sectionId}. Please try again.`,
         }));
+      } finally {
+        setLoading((prev) => ({ ...prev, [sectionId]: false }));
       }
-    } catch (error) {
-      console.error(`Failed to load ${sectionId}:`, error);
-      setContent((prev) => ({
-        ...prev,
-        [sectionId]: `# Error\n\nFailed to load ${sectionId}. Please try again.`,
-      }));
-    } finally {
-      setLoading((prev) => ({ ...prev, [sectionId]: false }));
-    }
-  }, [content, sessionId]);
+    },
+    [content, sessionId]
+  );
 
-  // Load active section on mount and when it changes
+  // Load all sections when sections are fetched
   useEffect(() => {
-    if (activeSection && !isLoadingSections) {
-      loadSection(activeSection);
+    if (sections.length > 0 && !isLoadingSections) {
+      // Load all sections in parallel
+      sections.forEach((section) => {
+        // loadSection already checks if content exists, so safe to call for all
+        loadSection(section.id);
+      });
     }
-  }, [activeSection, isLoadingSections, loadSection]);
+  }, [sections, isLoadingSections, loadSection]);
 
   const downloadMarkdown = (sectionId: string) => {
     if (!content[sectionId] || typeof window === 'undefined') return;
@@ -214,7 +271,7 @@ export default function HDDPage({
               ) : (
                 <>
                   <span>🎫</span>
-                  <span>Generate Tickets</span>
+                  <span>Generate Sprint</span>
                 </>
               )}
             </button>
@@ -234,8 +291,11 @@ export default function HDDPage({
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
+                    disabled={loading[section.id]}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
-                      activeSection === section.id
+                      loading[section.id]
+                        ? 'opacity-50 cursor-not-allowed bg-gray-50'
+                        : activeSection === section.id
                         ? 'bg-indigo-100 text-indigo-700 font-semibold shadow-md'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
@@ -270,8 +330,18 @@ export default function HDDPage({
                     {sections.find((s) => s.id === activeSection)?.label}
                   </h2>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${getSectionTypeBadge(sections.find((s) => s.id === activeSection)?.type || 'guide').bg}`}>
-                      {getSectionTypeBadge(sections.find((s) => s.id === activeSection)?.type || 'guide').text}
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs ${
+                        getSectionTypeBadge(
+                          sections.find((s) => s.id === activeSection)?.type || 'guide'
+                        ).bg
+                      }`}
+                    >
+                      {
+                        getSectionTypeBadge(
+                          sections.find((s) => s.id === activeSection)?.type || 'guide'
+                        ).text
+                      }
                     </span>
                   </div>
                 </div>

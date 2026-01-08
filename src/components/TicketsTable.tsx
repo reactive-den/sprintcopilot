@@ -1,16 +1,31 @@
 'use client';
 
 import type { Ticket } from '@/types';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 
 interface TicketsTableProps {
   tickets: Ticket[];
   isLoading?: boolean;
   className?: string;
+  onTicketsUpdate?: (updatedTickets: Ticket[]) => void;
 }
 
-export function TicketsTable({ tickets, isLoading = false, className = '' }: TicketsTableProps) {
+export function TicketsTable({ tickets, isLoading = false, className = '', onTicketsUpdate }: TicketsTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [editedTickets, setEditedTickets] = useState<Map<string, { description: string; acceptanceCriteria: string }>>(new Map());
+  const [savingTicketId, setSavingTicketId] = useState<string | null>(null);
+
+  // Initialize edited tickets with current values
+  useEffect(() => {
+    const initial = new Map<string, { description: string; acceptanceCriteria: string }>();
+    tickets.forEach((ticket) => {
+      initial.set(ticket.id, {
+        description: ticket.description,
+        acceptanceCriteria: ticket.acceptanceCriteria,
+      });
+    });
+    setEditedTickets(initial);
+  }, [tickets]);
 
   const toggleRow = (ticketId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -20,6 +35,57 @@ export function TicketsTable({ tickets, isLoading = false, className = '' }: Tic
       newExpanded.add(ticketId);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const handleDescriptionChange = (ticketId: string, value: string) => {
+    const updated = new Map(editedTickets);
+    const current = updated.get(ticketId) || { description: '', acceptanceCriteria: '' };
+    updated.set(ticketId, { ...current, description: value });
+    setEditedTickets(updated);
+  };
+
+  const handleAcceptanceCriteriaChange = (ticketId: string, value: string) => {
+    const updated = new Map(editedTickets);
+    const current = updated.get(ticketId) || { description: '', acceptanceCriteria: '' };
+    updated.set(ticketId, { ...current, acceptanceCriteria: value });
+    setEditedTickets(updated);
+  };
+
+  const handleSaveTicket = async (ticket: Ticket) => {
+    const edited = editedTickets.get(ticket.id);
+    if (!edited) return;
+
+    setSavingTicketId(ticket.id);
+    try {
+      const response = await fetch(`/api/tickets/${ticket.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: edited.description,
+          acceptanceCriteria: edited.acceptanceCriteria,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedTicket = await response.json();
+        // Update local tickets if callback provided
+        if (onTicketsUpdate) {
+          const updatedTickets = tickets.map((t) => (t.id === ticket.id ? updatedTicket : t));
+          onTicketsUpdate(updatedTickets);
+        }
+        alert('✅ Ticket updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to update ticket');
+      }
+    } catch (error) {
+      console.error('Failed to update ticket:', error);
+      alert('Failed to update ticket. Please try again.');
+    } finally {
+      setSavingTicketId(null);
+    }
   };
 
   if (isLoading) {
@@ -279,20 +345,52 @@ export function TicketsTable({ tickets, isLoading = false, className = '' }: Tic
               {isExpanded && (
                 <div className="p-4 bg-white space-y-4 border-t-2 border-gray-200">
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <span>📝</span>
-                      <span>Description</span>
-                    </h4>
-                    <p className="text-gray-700 text-sm leading-relaxed">{ticket.description}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-gray-700 flex items-center gap-2">
+                        <span>📝</span>
+                        <span>Description</span>
+                      </h4>
+                      <button
+                        onClick={() => handleSaveTicket(ticket)}
+                        disabled={savingTicketId === ticket.id}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-all flex items-center gap-2"
+                      >
+                        {savingTicketId === ticket.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>💾</span>
+                            <span>Save</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <textarea
+                      value={editedTickets.get(ticket.id)?.description || ticket.description}
+                      onChange={(e) => handleDescriptionChange(ticket.id, e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none text-sm"
+                      rows={8}
+                      placeholder="Enter objective (up to 10 lines) and acceptance criteria..."
+                    />
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
                       <span>✅</span>
                       <span>Acceptance Criteria</span>
                     </h4>
-                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                      {ticket.acceptanceCriteria}
-                    </div>
+                    <textarea
+                      value={editedTickets.get(ticket.id)?.acceptanceCriteria || ticket.acceptanceCriteria}
+                      onChange={(e) => handleAcceptanceCriteriaChange(ticket.id, e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none text-sm font-mono"
+                      rows={10}
+                      placeholder="Enter acceptance criteria (one per line, up to 10 items)..."
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Enter one acceptance criterion per line (up to 10 items). Each line will become a bullet point.
+                    </p>
                   </div>
                   {ticket.dependencies.length > 0 && (
                     <div>

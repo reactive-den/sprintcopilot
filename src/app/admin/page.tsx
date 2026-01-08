@@ -39,6 +39,9 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<ClickUpTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [isAddingSprint, setIsAddingSprint] = useState(false);
+  const [showAddSprintModal, setShowAddSprintModal] = useState(false);
+  const [featureDescription, setFeatureDescription] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
   // Fetch projects from ClickUp on mount
@@ -165,6 +168,55 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddSprint = () => {
+    if (!selectedProjectId) return;
+    setShowAddSprintModal(true);
+    setFeatureDescription('');
+  };
+
+  const handleCreateSprintWithTickets = async () => {
+    if (!selectedProjectId || !featureDescription.trim()) {
+      alert('Please provide a feature description');
+      return;
+    }
+
+    setIsAddingSprint(true);
+    try {
+      // Get the current folder to find the next sprint number
+      const currentSprintCount = folders[0]?.lists?.length || 0;
+      const nextSprintNumber = currentSprintCount + 1;
+
+      // Generate tickets and create run (but don't create sprint in ClickUp yet)
+      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/generate-sprint-tickets`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sprintNumber: nextSprintNumber,
+          featureDescription: featureDescription.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Navigate to tickets page where user can edit and then upload to ClickUp
+        router.push(`/projects/${data.projectId}/tickets/${data.runId}?sprintNumber=${nextSprintNumber}&folderId=${selectedProjectId}`);
+      } else {
+        const error = await response.json();
+        console.error('Failed to generate tickets:', error);
+        const errorMessage = error.error || error.message || 'Failed to generate tickets';
+        alert(`Error: ${errorMessage}\n\nPlease ensure:\n- Project has a business document\n- Project has HDD sections generated\n- Feature description is detailed enough`);
+      }
+    } catch (error) {
+      console.error('Failed to generate tickets:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to generate tickets: ${errorMessage}\n\nPlease check the console for more details.`);
+    } finally {
+      setIsAddingSprint(false);
+    }
+  };
+
   if (isLoading && projects.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
@@ -198,28 +250,11 @@ export default function AdminPage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={handleEstimate}
-                disabled={isEstimating || !selectedProjectId}
-                className="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                {isEstimating ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Estimating...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>📊</span>
-                    <span>Estimate</span>
-                  </>
-                )}
-              </button>
-              <button
                 onClick={() => router.push('/')}
                 className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <span>🏠</span>
-                <span>Home</span>
+                <span>➕</span>
+                <span>Add Project</span>
               </button>
             </div>
           </div>
@@ -242,6 +277,75 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Add Sprint Modal */}
+        {showAddSprintModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Sprint</h2>
+                <button
+                  onClick={() => {
+                    setShowAddSprintModal(false);
+                    setFeatureDescription('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <span className="text-2xl">×</span>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Feature Description *
+                  </label>
+                  <textarea
+                    value={featureDescription}
+                    onChange={(e) => setFeatureDescription(e.target.value)}
+                    placeholder="Describe the feature or functionality you want to implement in this sprint..."
+                    className="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none"
+                    rows={8}
+                    disabled={isAddingSprint}
+                  />
+                  <p className="mt-2 text-sm text-gray-500">
+                    This feature will be used along with your project's HDD, LLDs, and business document context to generate tickets.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleCreateSprintWithTickets}
+                  disabled={isAddingSprint || !featureDescription.trim()}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {isAddingSprint ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Creating Sprint & Tickets...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>➕</span>
+                      <span>Create Sprint</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddSprintModal(false);
+                    setFeatureDescription('');
+                  }}
+                  disabled={isAddingSprint}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {selectedProjectId ? (
           <>
             {/* Back Button */}
@@ -255,12 +359,41 @@ export default function AdminPage() {
 
             {/* Folders Section */}
             <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span>📁</span>
-                <span>Project Folders ({folders.length})</span>
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <span>📁</span>
+                  <span>Project Folders ({folders.length})</span>
+                </h2>
+                {selectedProjectId && (
+                  <button
+                    onClick={handleAddSprint}
+                    disabled={isAddingSprint || !selectedProjectId}
+                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {isAddingSprint ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Adding Sprint...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>➕</span>
+                        <span>Add Sprint</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
 
-              {folders.length > 0 ? (
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="relative w-16 h-16 mb-4">
+                    <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                  </div>
+                  <p className="text-gray-600 font-medium">Loading folders from ClickUp...</p>
+                </div>
+              ) : folders.length > 0 ? (
                 <div className="space-y-4">
                   {folders.map((folder) => (
                     <div key={folder.id} className="border border-indigo-200 rounded-xl overflow-hidden">
@@ -309,11 +442,38 @@ export default function AdminPage() {
 
             {/* Tasks Section */}
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span>🎫</span>
-                <span>All Tasks ({tasks.length})</span>
-              </h2>
-              {tasks.length > 0 ? (
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <span>🎫</span>
+                  <span>All Tasks ({tasks.length})</span>
+                </h2>
+                <button
+                  onClick={handleEstimate}
+                  disabled={isEstimating || !selectedProjectId}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  {isEstimating ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Estimating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📊</span>
+                      <span>Estimate</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="relative w-16 h-16 mb-4">
+                    <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                  </div>
+                  <p className="text-gray-600 font-medium">Loading tasks from ClickUp...</p>
+                </div>
+              ) : tasks.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>

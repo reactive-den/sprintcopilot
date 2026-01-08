@@ -11,6 +11,10 @@ const projectSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
   problem: z.string().min(50, 'Problem statement must be at least 50 characters'),
   constraints: z.string().optional(),
+  repoUrl: z
+    .union([z.string().url('Please enter a valid URL'), z.literal(''), z.undefined()])
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -110,6 +114,27 @@ export function ProjectForm() {
             <span>⚠️</span> {errors.constraints.message}
           </p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="repoUrl" className="block text-sm font-semibold text-gray-700">
+          Repository URL <span className="text-gray-400 font-normal">(Optional)</span>
+        </label>
+        <input
+          id="repoUrl"
+          type="url"
+          {...register('repoUrl')}
+          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder:text-gray-500 text-gray-900"
+          placeholder="https://github.com/owner/repo"
+        />
+        {errors.repoUrl && (
+          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+            <span>⚠️</span> {errors.repoUrl.message}
+          </p>
+        )}
+        <p className="mt-1 text-sm text-gray-500">
+          Optional: Provide a GitHub repository URL for additional context when generating tickets.
+        </p>
       </div>
 
       {error && (

@@ -65,25 +65,14 @@ export async function POST(
       );
     }
 
-    // Check if a message is a setup question (like GitHub URL) - should not count toward question limit
-    const isSetupQuestion = (content: string) => {
-      const lower = content.toLowerCase();
-      return (
-        lower.includes('github') ||
-        lower.includes('repository url') ||
-        lower.includes('repo url') ||
-        lower.includes('no repo')
-      );
-    };
-
     // Check if an assistant message actually contains a question (ends with ?)
     const isQuestion = (content: string) => {
       return content.trim().endsWith('?');
     };
 
-    // Count questions asked by AI (excluding setup questions and thank you messages)
+    // Count questions asked by AI (excluding thank you messages)
     const questionCount = session.messages.filter(
-      (msg) => msg.role === 'assistant' && !isSetupQuestion(msg.content) && isQuestion(msg.content)
+      (msg) => msg.role === 'assistant' && isQuestion(msg.content)
     ).length;
     const maxQuestions = 5;
 
