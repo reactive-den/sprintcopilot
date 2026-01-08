@@ -186,8 +186,8 @@ export default function AdminPage() {
       const currentSprintCount = folders[0]?.lists?.length || 0;
       const nextSprintNumber = currentSprintCount + 1;
 
-      // Create sprint and generate tickets
-      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/sprint-with-tickets`, {
+      // Generate tickets and create run (but don't create sprint in ClickUp yet)
+      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/generate-sprint-tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -200,18 +200,18 @@ export default function AdminPage() {
 
       if (response.ok) {
         const data = await response.json();
-        alert(`✅ Successfully created Sprint ${nextSprintNumber} with ${data.ticketsCreated || 0} tickets!`);
-        setShowAddSprintModal(false);
-        setFeatureDescription('');
-        // Refresh the data to show the new sprint
-        window.location.reload();
+        // Navigate to tickets page where user can edit and then upload to ClickUp
+        router.push(`/projects/${data.projectId}/tickets/${data.runId}?sprintNumber=${nextSprintNumber}&folderId=${selectedProjectId}`);
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create sprint with tickets');
+        console.error('Failed to generate tickets:', error);
+        const errorMessage = error.error || error.message || 'Failed to generate tickets';
+        alert(`Error: ${errorMessage}\n\nPlease ensure:\n- Project has a business document\n- Project has HDD sections generated\n- Feature description is detailed enough`);
       }
     } catch (error) {
-      console.error('Failed to add sprint:', error);
-      alert('Failed to add sprint. Please try again.');
+      console.error('Failed to generate tickets:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Failed to generate tickets: ${errorMessage}\n\nPlease check the console for more details.`);
     } finally {
       setIsAddingSprint(false);
     }

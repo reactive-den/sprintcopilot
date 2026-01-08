@@ -1,7 +1,7 @@
 'use client';
 
-import { use, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { use, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRun } from '@/hooks/useRun';
 import { useExport } from '@/hooks/useExport';
 import { TicketsTable } from '@/components/TicketsTable';
@@ -13,18 +13,65 @@ export default function TicketsPage({
 }) {
   const { id: projectId, runId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: run, isLoading, error } = useRun(runId);
   const { createClickUpTasks, isExporting, exportError } = useExport();
+  const [sprintNumber, setSprintNumber] = useState<number | null>(null);
+  const [folderId, setFolderId] = useState<string | null>(null);
+  const [isUploadingToSprint, setIsUploadingToSprint] = useState(false);
+
+  useEffect(() => {
+    const sprint = searchParams.get('sprintNumber');
+    const folder = searchParams.get('folderId');
+    if (sprint) setSprintNumber(parseInt(sprint, 10));
+    if (folder) setFolderId(folder);
+  }, [searchParams]);
 
   const handleCreateClickUpTasks = async () => {
-    try {
-      const result = await createClickUpTasks(run.id);
-      // Redirect to global admin screen with ClickUp data
-      if (result && result.created && result.created.length > 0) {
-        router.push('/admin');
+    if (!run) return;
+    
+    const currentRun = run; // Store in local variable for TypeScript
+    
+    // If this is for a specific sprint, use the sprint upload endpoint
+    if (sprintNumber && folderId) {
+      setIsUploadingToSprint(true);
+      try {
+        const response = await fetch(`/api/clickup/folder/${folderId}/upload-sprint-tickets`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            runId: currentRun.id,
+            sprintNumber,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(`✅ Successfully uploaded ${data.ticketsCreated || 0} tickets to Sprint ${sprintNumber}!`);
+          router.push('/admin');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to upload tickets to sprint');
+        }
+      } catch (err) {
+        console.error('Failed to upload tickets to sprint:', err);
+        alert('Failed to upload tickets. Please try again.');
+      } finally {
+        setIsUploadingToSprint(false);
       }
-    } catch (err) {
-      // Error is handled by useExport hook
+    } else {
+      // Regular flow - create all sprints
+      try {
+        const result = await createClickUpTasks(currentRun.id);
+        // Redirect to global admin screen with ClickUp data
+        if (result && result.created && result.created.length > 0) {
+          router.push('/admin');
+        }
+      } catch (err) {
+        // Error is handled by useExport hook
+      }
     }
   };
 
@@ -63,7 +110,7 @@ export default function TicketsPage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* Loading Overlay */}
-      {isExporting && (
+      {(isExporting || isUploadingToSprint) && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
             <div className="relative w-16 h-16 mx-auto mb-6">
@@ -99,18 +146,18 @@ export default function TicketsPage({
             </div>
             <button
               onClick={handleCreateClickUpTasks}
-              disabled={isExporting || !run.tickets?.length}
+              disabled={(isExporting || isUploadingToSprint) || !run.tickets?.length}
               className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              {isExporting ? (
+              {(isExporting || isUploadingToSprint) ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Creating...</span>
+                  <span>{sprintNumber ? `Uploading to Sprint ${sprintNumber}...` : 'Creating...'}</span>
                 </>
               ) : (
                 <>
                   <span>✅</span>
-                  <span>Create ClickUp Tasks</span>
+                  <span>{sprintNumber ? `Upload to Sprint ${sprintNumber}` : 'Create ClickUp Tasks'}</span>
                 </>
               )}
             </button>
@@ -137,6 +184,13 @@ export default function TicketsPage({
         {run.tickets && run.tickets.length > 0 ? (
           <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">All Tickets</h2>
+            {sprintNumber && (
+              <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                <p className="text-sm text-blue-800">
+                  <span className="font-semibold">Sprint {sprintNumber}:</span> Review and edit ticket descriptions below, then click "Upload to Sprint {sprintNumber}" to create them in ClickUp.
+                </p>
+              </div>
+            )}
             <TicketsTable tickets={run.tickets} />
           </div>
         ) : (

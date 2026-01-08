@@ -92,7 +92,15 @@ Guidelines:
 - Include dependencies as array of ticket indices if tickets depend on others
 - Tags should be provided separately in the tags array (e.g., ["frontend", "backend", "api", "database", "ui", "testing"])
 
-Return ONLY valid JSON array, no markdown formatting.`;
+Return ONLY valid JSON array, no markdown formatting.
+
+**CRITICAL JSON FORMATTING RULES:**
+- All strings must be properly escaped (use \\n for newlines, \\" for quotes)
+- No trailing commas in objects or arrays
+- All property names must be in double quotes
+- No comments or extra text outside the JSON array
+- Ensure all special characters in strings are properly escaped
+- Description field may contain newlines - they must be escaped as \\n in JSON`;
 
 export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promise<PipelineTicket[]> {
   const prompt = TICKET_GENERATION_PROMPT.replace('{projectTitle}', input.projectTitle)
@@ -121,11 +129,136 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
     const content =
       typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
 
-    // Extract JSON from response
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    const jsonStr = jsonMatch ? jsonMatch[0] : content;
+    console.log(`📝 [TICKET-GENERATOR] LLM response length: ${content.length} chars`);
+    console.log(`📝 [TICKET-GENERATOR] LLM response preview: ${content.substring(0, 200)}...`);
 
-    const tickets = JSON.parse(jsonStr) as PipelineTicket[];
+    // Extract JSON from response (handle markdown code blocks)
+    let jsonStr = content;
+    const markdownMatch = content.match(/```json\n?([\s\S]*?)\n?```/);
+    if (markdownMatch) {
+      jsonStr = markdownMatch[1];
+    } else {
+      const arrayMatch = content.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        jsonStr = arrayMatch[0];
+      }
+    }
+
+    if (!jsonStr || jsonStr.trim().length === 0) {
+      throw new Error('LLM returned empty response. Please try again.');
+    }
+
+    // Clean up common JSON issues
+    jsonStr = jsonStr.trim();
+    
+    // Remove any leading/trailing markdown or text
+    jsonStr = jsonStr.replace(/^[^{[]*/, '').replace(/[^}\]]*$/, '');
+
+    let tickets: PipelineTicket[];
+    try {
+      tickets = JSON.parse(jsonStr) as PipelineTicket[];
+    } catch (parseError) {
+      console.error('❌ [TICKET-GENERATOR] JSON parse error:', parseError);
+      
+      // If it's a SyntaxError, try to find and log the problematic area
+      if (parseError instanceof SyntaxError && parseError.message.includes('position')) {
+        const positionMatch = parseError.message.match(/position (\d+)/);
+        if (positionMatch) {
+          const position = parseInt(positionMatch[1], 10);
+          const start = Math.max(0, position - 500);
+          const end = Math.min(jsonStr.length, position + 500);
+          const lineNumber = jsonStr.substring(0, position).split('\n').length;
+          console.error(`❌ [TICKET-GENERATOR] Error at position ${position} (line ${lineNumber}):`);
+          console.error(`❌ [TICKET-GENERATOR] Context around error:`);
+          console.error(jsonStr.substring(start, end));
+          console.error(`❌ [TICKET-GENERATOR] Character at error position: "${jsonStr[position]}" (char code: ${jsonStr.charCodeAt(position)})`);
+        }
+      }
+      
+      // Try to repair common JSON issues
+      try {
+        console.log('🔄 [TICKET-GENERATOR] Attempting to repair JSON...');
+        
+        let repaired = jsonStr;
+        
+        // Step 1: Remove trailing commas before } or ]
+        repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+        
+        // Step 2: Fix unescaped newlines, tabs, and carriage returns in string values
+        // We'll use a state machine to track when we're inside a string
+        let inString = false;
+        let escapeNext = false;
+        let result = '';
+        
+        for (let i = 0; i < repaired.length; i++) {
+          const char = repaired[i];
+          const prevChar = i > 0 ? repaired[i - 1] : '';
+          
+          // Handle escape sequences
+          if (escapeNext) {
+            result += char;
+            escapeNext = false;
+            continue;
+          }
+          
+          if (char === '\\') {
+            result += char;
+            escapeNext = true;
+            continue;
+          }
+          
+          // Toggle string state on unescaped quotes
+          if (char === '"' && (i === 0 || repaired[i - 1] !== '\\' || (i > 1 && repaired[i - 2] === '\\'))) {
+            // Check if previous backslash was itself escaped
+            let backslashCount = 0;
+            for (let j = i - 1; j >= 0 && repaired[j] === '\\'; j--) {
+              backslashCount++;
+            }
+            if (backslashCount % 2 === 0) {
+              inString = !inString;
+            }
+            result += char;
+            continue;
+          }
+          
+          // Inside a string - escape special characters
+          if (inString) {
+            if (char === '\n') {
+              result += '\\n';
+            } else if (char === '\r') {
+              result += '\\r';
+            } else if (char === '\t') {
+              result += '\\t';
+            } else {
+              result += char;
+            }
+          } else {
+            // Outside string - keep as is
+            result += char;
+          }
+        }
+        
+        repaired = result;
+        
+        // Step 3: Try parsing the repaired version
+        tickets = JSON.parse(repaired) as PipelineTicket[];
+        console.log('✅ [TICKET-GENERATOR] Successfully repaired and parsed JSON');
+      } catch (repairError) {
+        // If repair fails, log the full JSON for debugging
+        console.error('❌ [TICKET-GENERATOR] JSON repair failed');
+        console.error('❌ [TICKET-GENERATOR] Full JSON (first 2000 chars):', jsonStr.substring(0, 2000));
+        console.error('❌ [TICKET-GENERATOR] Full JSON (last 2000 chars):', jsonStr.substring(Math.max(0, jsonStr.length - 2000)));
+        
+        throw new Error(
+          `Failed to parse tickets JSON: ${parseError instanceof Error ? parseError.message : 'Invalid JSON format'}. ` +
+          `The LLM may have generated invalid JSON. Please try again with a more detailed feature description.`
+        );
+      }
+    }
+
+    if (!Array.isArray(tickets)) {
+      throw new Error('LLM did not return an array of tickets. Please try again.');
+    }
 
     // Validate and ensure all required fields
     // Force all tickets to Sprint 1
