@@ -24,28 +24,28 @@ type ClickUpTicket = {
 };
 
 const buildDescription = (ticket: ClickUpTicket, projectTitle: string) => {
-  const tags = ticket.tags.length > 0 ? ticket.tags.join(', ') : 'None';
-  const dependencies = ticket.dependencies.length > 0 ? ticket.dependencies.map((dep) => `- ${dep}`).join('\n') : 'None';
-  const estimate = ticket.estimateHours ? `${ticket.estimateHours}h` : 'N/A';
-  const sprint = ticket.sprint ?? 'TBD';
-  const tshirt = ticket.tshirtSize ?? 'N/A';
-
-  return [
-    `Project: ${projectTitle}`,
-    `Sprint: ${sprint}`,
-    `Estimate: ${estimate}`,
-    `T-Shirt Size: ${tshirt}`,
-    `Priority: P${ticket.priority}`,
-    `Tags: ${tags}`,
-    '',
-    ticket.description,
-    '',
-    'Acceptance Criteria:',
-    ticket.acceptanceCriteria,
-    '',
-    'Dependencies:',
-    dependencies,
-  ].join('\n');
+  // Extract objective and acceptance criteria from description
+  // The description should already contain: Objective + "Acceptance Criteria:" + bullet points
+  // If acceptance criteria is separate, format it properly
+  let description = ticket.description || '';
+  
+  // If description doesn't already include acceptance criteria, add it
+  if (description && !description.includes('Acceptance Criteria:')) {
+    const acceptanceCriteria = Array.isArray(ticket.acceptanceCriteria)
+      ? ticket.acceptanceCriteria
+      : ticket.acceptanceCriteria
+        ? [ticket.acceptanceCriteria]
+        : [];
+    
+    if (acceptanceCriteria.length > 0) {
+      const criteriaText = acceptanceCriteria.map(c => `- ${c}`).join('\n');
+      description = `${description}\n\nAcceptance Criteria:\n${criteriaText}`;
+    }
+  }
+  
+  // Return only the description (which contains Objective + Acceptance Criteria)
+  // No metadata, tags, dependencies, or other sections
+  return description.trim();
 };
 
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {

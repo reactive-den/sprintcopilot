@@ -46,16 +46,18 @@ Based on all this information, generate a comprehensive list of tickets that bre
 
 **CRITICAL REQUIREMENTS FOR EACH TICKET:**
 
-1. **Objective (Minimum 8 lines):**
+1. **Objective (Up to 10 lines):**
    - The objective must be a detailed, comprehensive description of what needs to be accomplished
-   - It should be at least 8 lines long, explaining the purpose, context, and goals of the ticket
+   - It should be up to 10 lines long, explaining the purpose, context, and goals of the ticket
    - Write it as a multi-line paragraph, not bullet points
    - Include why this work is needed and what problem it solves
+   - Keep it concise but comprehensive (maximum 10 lines)
 
-2. **Acceptance Criteria (Up to 8 bullet points):**
-   - Provide between 5-8 clear, testable acceptance criteria
+2. **Acceptance Criteria (Up to 10 bullet points):**
+   - Provide up to 10 clear, testable acceptance criteria
    - Each criterion should be specific and measurable
    - Use bullet point format
+   - Aim for 8-10 criteria to ensure comprehensive coverage
 
 3. **Ticket Description Structure:**
    - The description field should contain ONLY the Objective followed by the Acceptance Criteria
@@ -67,9 +69,9 @@ Return a JSON array of tickets in this exact format:
 [
   {
     "title": "Ticket title",
-    "description": "Objective paragraph (minimum 8 lines explaining what needs to be done, why it's needed, and the context)...\n\nAcceptance Criteria:\n- Criterion 1\n- Criterion 2\n- Criterion 3\n- Criterion 4\n- Criterion 5\n- Criterion 6\n- Criterion 7\n- Criterion 8",
+    "description": "Objective paragraph (up to 10 lines explaining what needs to be done, why it's needed, and the context)...\n\nAcceptance Criteria:\n- Criterion 1\n- Criterion 2\n- Criterion 3\n- Criterion 4\n- Criterion 5\n- Criterion 6\n- Criterion 7\n- Criterion 8\n- Criterion 9\n- Criterion 10",
     "tags": ["frontend", "api"],
-    "acceptanceCriteria": ["Criterion 1", "Criterion 2", "Criterion 3", "Criterion 4", "Criterion 5", "Criterion 6", "Criterion 7", "Criterion 8"],
+    "acceptanceCriteria": ["Criterion 1", "Criterion 2", "Criterion 3", "Criterion 4", "Criterion 5", "Criterion 6", "Criterion 7", "Criterion 8", "Criterion 9", "Criterion 10"],
     "estimateHours": 8,
     "tshirtSize": "M",
     "priority": 1,
@@ -84,8 +86,8 @@ Guidelines:
 - Use T-shirt sizes: XS (1-2h), S (3-4h), M (5-8h), L (9-16h), XL (17-32h)
 - Priority: 1 = highest, 5 = lowest
 - **CRITICAL: All tickets must be assigned to Sprint 1 (sprint: 1). Do NOT create multiple sprints.**
-- **CRITICAL: Objective must be minimum 8 lines. Do not make it shorter.**
-- **CRITICAL: Acceptance criteria must be 5-8 bullet points. Do not exceed 8.**
+- **CRITICAL: Objective must be up to 10 lines. Keep it comprehensive but concise.**
+- **CRITICAL: Acceptance criteria must be up to 10 bullet points. Aim for 8-10 criteria.**
 - **CRITICAL: Description field should ONLY contain Objective + Acceptance Criteria, nothing else. Do NOT include tags, dependencies, or metadata in description.**
 - Include dependencies as array of ticket indices if tickets depend on others
 - Tags should be provided separately in the tags array (e.g., ["frontend", "backend", "api", "database", "ui", "testing"])
@@ -128,16 +130,16 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
     // Validate and ensure all required fields
     // Force all tickets to Sprint 1
     return tickets.map((ticket, index) => {
-      // Ensure acceptance criteria is an array with max 8 items
+      // Ensure acceptance criteria is an array with max 10 items
       let acceptanceCriteria = Array.isArray(ticket.acceptanceCriteria)
         ? ticket.acceptanceCriteria
         : ticket.acceptanceCriteria
           ? [ticket.acceptanceCriteria]
           : [];
       
-      // Limit to 8 acceptance criteria
-      if (acceptanceCriteria.length > 8) {
-        acceptanceCriteria = acceptanceCriteria.slice(0, 8);
+      // Limit to 10 acceptance criteria
+      if (acceptanceCriteria.length > 10) {
+        acceptanceCriteria = acceptanceCriteria.slice(0, 10);
       }
 
       // Ensure description contains objective and acceptance criteria

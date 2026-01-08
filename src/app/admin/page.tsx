@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [tasks, setTasks] = useState<ClickUpTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [isAddingSprint, setIsAddingSprint] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
   // Fetch projects from ClickUp on mount
@@ -165,6 +166,43 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddSprint = async () => {
+    if (!selectedProjectId) return;
+
+    setIsAddingSprint(true);
+    try {
+      // Get the current folder to find the next sprint number
+      const currentSprintCount = folders[0]?.lists?.length || 0;
+      const nextSprintNumber = currentSprintCount + 1;
+
+      // Create a new sprint list in ClickUp
+      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/sprint`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sprintNumber: nextSprintNumber,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`✅ Successfully created Sprint ${nextSprintNumber}!`);
+        // Refresh the data to show the new sprint
+        window.location.reload();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to create sprint');
+      }
+    } catch (error) {
+      console.error('Failed to add sprint:', error);
+      alert('Failed to add sprint. Please try again.');
+    } finally {
+      setIsAddingSprint(false);
+    }
+  };
+
   if (isLoading && projects.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
@@ -201,8 +239,8 @@ export default function AdminPage() {
                 onClick={() => router.push('/')}
                 className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <span>🏠</span>
-                <span>Home</span>
+                <span>➕</span>
+                <span>Add Project</span>
               </button>
             </div>
           </div>
@@ -238,10 +276,31 @@ export default function AdminPage() {
 
             {/* Folders Section */}
             <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span>📁</span>
-                <span>Project Folders ({folders.length})</span>
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <span>📁</span>
+                  <span>Project Folders ({folders.length})</span>
+                </h2>
+                {selectedProjectId && (
+                  <button
+                    onClick={handleAddSprint}
+                    disabled={isAddingSprint || !selectedProjectId}
+                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {isAddingSprint ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Adding Sprint...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>➕</span>
+                        <span>Add Sprint</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
 
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
