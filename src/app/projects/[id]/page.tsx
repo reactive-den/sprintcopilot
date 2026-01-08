@@ -142,6 +142,26 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      {/* Loading Overlay for ClickUp Export */}
+      {isExporting && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+            <div className="relative w-16 h-16 mx-auto mb-6">
+              <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Creating ClickUp Tasks</h3>
+            <p className="text-gray-600 mb-4">
+              Please wait while we create tasks in ClickUp...
+            </p>
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container mx-auto px-4 py-8">
         {/* Header Card */}
         <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">

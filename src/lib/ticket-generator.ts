@@ -42,25 +42,39 @@ Deployment: {deployment}
 Data Flow: {dataflow}
 Users: {users}
 
-Based on all this information, generate a comprehensive list of tickets that break down the work needed to implement this feature. Each ticket should be:
-- Specific and actionable
-- Include clear acceptance criteria
-- Have appropriate estimates
-- Be properly prioritized
-- Include dependencies if needed
+Based on all this information, generate a comprehensive list of tickets that break down the work needed to implement this feature.
+
+**CRITICAL REQUIREMENTS FOR EACH TICKET:**
+
+1. **Objective (Minimum 8 lines):**
+   - The objective must be a detailed, comprehensive description of what needs to be accomplished
+   - It should be at least 8 lines long, explaining the purpose, context, and goals of the ticket
+   - Write it as a multi-line paragraph, not bullet points
+   - Include why this work is needed and what problem it solves
+
+2. **Acceptance Criteria (Up to 8 bullet points):**
+   - Provide between 5-8 clear, testable acceptance criteria
+   - Each criterion should be specific and measurable
+   - Use bullet point format
+
+3. **Ticket Description Structure:**
+   - The description field should contain ONLY the Objective followed by the Acceptance Criteria
+   - Format: First write the Objective (8+ lines), then add "Acceptance Criteria:" followed by the bullet points
+   - **DO NOT include tags, dependencies, or any other metadata in the description field**
+   - Tags will be stored separately and displayed in the table, not in the description
 
 Return a JSON array of tickets in this exact format:
 [
   {
     "title": "Ticket title",
-    "description": "Detailed description of what needs to be done",
-    "acceptanceCriteria": ["Criterion 1", "Criterion 2", "Criterion 3"],
+    "description": "Objective paragraph (minimum 8 lines explaining what needs to be done, why it's needed, and the context)...\n\nAcceptance Criteria:\n- Criterion 1\n- Criterion 2\n- Criterion 3\n- Criterion 4\n- Criterion 5\n- Criterion 6\n- Criterion 7\n- Criterion 8",
+    "tags": ["frontend", "api"],
+    "acceptanceCriteria": ["Criterion 1", "Criterion 2", "Criterion 3", "Criterion 4", "Criterion 5", "Criterion 6", "Criterion 7", "Criterion 8"],
     "estimateHours": 8,
     "tshirtSize": "M",
     "priority": 1,
     "sprint": 1,
-    "dependencies": [],
-    "tags": ["tag1", "tag2"]
+    "dependencies": []
   }
 ]
 
@@ -70,8 +84,11 @@ Guidelines:
 - Use T-shirt sizes: XS (1-2h), S (3-4h), M (5-8h), L (9-16h), XL (17-32h)
 - Priority: 1 = highest, 5 = lowest
 - **CRITICAL: All tickets must be assigned to Sprint 1 (sprint: 1). Do NOT create multiple sprints.**
+- **CRITICAL: Objective must be minimum 8 lines. Do not make it shorter.**
+- **CRITICAL: Acceptance criteria must be 5-8 bullet points. Do not exceed 8.**
+- **CRITICAL: Description field should ONLY contain Objective + Acceptance Criteria, nothing else. Do NOT include tags, dependencies, or metadata in description.**
 - Include dependencies as array of ticket indices if tickets depend on others
-- Tags should be relevant (e.g., "frontend", "backend", "database", "api", "ui", "testing")
+- Tags should be provided separately in the tags array (e.g., ["frontend", "backend", "api", "database", "ui", "testing"])
 
 Return ONLY valid JSON array, no markdown formatting.`;
 
@@ -110,24 +127,57 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
 
     // Validate and ensure all required fields
     // Force all tickets to Sprint 1
-    return tickets.map((ticket, index) => ({
-      title: ticket.title || `Ticket ${index + 1}`,
-      description: ticket.description || '',
-      acceptanceCriteria: Array.isArray(ticket.acceptanceCriteria)
+    return tickets.map((ticket, index) => {
+      // Ensure acceptance criteria is an array with max 8 items
+      let acceptanceCriteria = Array.isArray(ticket.acceptanceCriteria)
         ? ticket.acceptanceCriteria
         : ticket.acceptanceCriteria
           ? [ticket.acceptanceCriteria]
-          : [],
-      estimateHours: ticket.estimateHours || 8,
-      tshirtSize: ticket.tshirtSize || 'M',
-      priority: ticket.priority || 3,
-      sprint: 1, // Force all tickets to Sprint 1
-      // Convert dependencies to strings if they are integers (ticket indices)
-      dependencies: (ticket.dependencies || []).map((dep) =>
-        typeof dep === 'number' ? String(dep) : dep
-      ),
-      tags: ticket.tags || [],
-    }));
+          : [];
+      
+      // Limit to 8 acceptance criteria
+      if (acceptanceCriteria.length > 8) {
+        acceptanceCriteria = acceptanceCriteria.slice(0, 8);
+      }
+
+      // Ensure description contains objective and acceptance criteria
+      let description = ticket.description || '';
+      
+      // Remove any tags, dependencies, or metadata that might have been included in description
+      // Clean up common patterns that shouldn't be in description
+      description = description
+        .replace(/Tags?:?\s*\[.*?\]/gi, '')
+        .replace(/Tags?:?\s*[^\n]*/gi, '')
+        .replace(/Dependencies?:?\s*\[.*?\]/gi, '')
+        .replace(/Dependencies?:?\s*[^\n]*/gi, '')
+        .replace(/Sprint:?\s*\d+/gi, '')
+        .replace(/Priority:?\s*\d+/gi, '')
+        .replace(/Estimate:?\s*[^\n]*/gi, '')
+        .trim();
+      
+      // If description doesn't have acceptance criteria section, add it
+      if (description && !description.includes('Acceptance Criteria:')) {
+        const criteriaText = acceptanceCriteria.length > 0
+          ? '\n\nAcceptance Criteria:\n' + acceptanceCriteria.map(c => `- ${c}`).join('\n')
+          : '';
+        description = description + criteriaText;
+      }
+
+      return {
+        title: ticket.title || `Ticket ${index + 1}`,
+        description: description,
+        acceptanceCriteria: acceptanceCriteria,
+        estimateHours: ticket.estimateHours || 8,
+        tshirtSize: ticket.tshirtSize || 'M',
+        priority: ticket.priority || 3,
+        sprint: 1, // Force all tickets to Sprint 1
+        // Convert dependencies to strings if they are integers (ticket indices)
+        dependencies: (ticket.dependencies || []).map((dep) =>
+          typeof dep === 'number' ? String(dep) : dep
+        ),
+        tags: ticket.tags || [], // Keep tags for backward compatibility but not required in prompt
+      };
+    });
   } catch (error) {
     console.error('❌ [TICKET-GENERATOR] Error generating tickets:', error);
     throw new Error('Failed to generate tickets. Please try again.');
