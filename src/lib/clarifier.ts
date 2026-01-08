@@ -27,28 +27,31 @@ Context: {context}
 Constraints: {constraints}
 Repo URL: {repoUrl}
 
+Question Count: {questionCount}
+
 Conversation History:
 {conversation}
 
-Question Count: Count how many questions you've asked so far. You can ask a maximum of 5 questions total.
-
 The user just responded. Based on their answer:
 
-1. **Acknowledge briefly** (one short sentence)
-2. **Ask the next question:**
-   - If you've asked 5 questions already, thank them and say you have enough information to proceed
-   - Otherwise, ask ONE short, simple question (max 15 words)
-   - Move to a new topic if the previous one is clear
+**CRITICAL: If questionCount >= 5, you MUST NOT ask any more questions. You MUST only thank them and say you have enough information to proceed.**
+
+Otherwise:
+1. Acknowledge briefly (one short sentence)
+2. Ask ONE short, simple question (max 15 words) about a NEW topic not already covered
 
 **Critical guidelines:**
 - Keep questions SHORT (one sentence, max 15 words)
 - Use SIMPLE language (avoid technical terms)
 - Ask ONE question at a time
-- Cover: users, what it does, when needed, who benefits, success looks like
-- If a repo URL is already provided, do NOT ask for it again
-- After 5 questions, stop asking and thank them
+- Cover topics: who uses it, what does it do, when needed, success measure
+- IMPORTANT: Review the conversation history - do NOT ask questions already answered
+- If questionCount >= 5: ONLY respond with a thank you message, NO questions
 
-Your response should be: [Brief acknowledgment] + [One short question OR closing statement if at 10 questions]
+Your response should be:
+- If questionCount >= 5: Just a warm thank you message (e.g., "Thank you so much! I have all the information I need to proceed.")
+- Otherwise: [Brief acknowledgment] + [One short question]
+
 Keep total response under 3 sentences.`;
 
 const FINALIZE_CLARIFICATIONS_PROMPT = `You are a senior product manager finalizing feature clarifications.
@@ -106,7 +109,8 @@ export async function generateAIResponse(
     repoUrl?: string | null;
     messages: Array<{ role: string; content: string }>;
   },
-  userMessage: string
+  userMessage: string,
+  questionCount: number
 ): Promise<string> {
   // Build conversation history
   const conversationHistory = session.messages
@@ -119,6 +123,7 @@ export async function generateAIResponse(
     .replace('{context}', session.context || 'Not specified')
     .replace('{constraints}', session.constraints || 'None')
     .replace('{repoUrl}', session.repoUrl || 'Not provided')
+    .replace('{questionCount}', String(questionCount))
     .replace('{conversation}', conversation);
 
   try {

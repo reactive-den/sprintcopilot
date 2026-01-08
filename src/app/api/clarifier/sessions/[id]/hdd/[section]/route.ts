@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
-import { generateHDDSection, type HDDSection } from '@/lib/hdd-generator';
+import { generateHDDSection, getSectionConfig, type HDDSection } from '@/lib/hdd-generator';
+import { getAvailableSectionIds } from '@/lib/hdd-config';
 import type { RepoAnalysis } from '@/types';
+import type { BusinessDocument } from '@/lib/business-document';
 
 export async function GET(
   request: NextRequest,
@@ -10,8 +12,9 @@ export async function GET(
 ) {
   try {
     const { id, section } = await params;
+    const validSections = getAvailableSectionIds();
 
-    if (!['architecture', 'deployment', 'dataflow', 'users'].includes(section)) {
+    if (!validSections.includes(section)) {
       return NextResponse.json({ error: 'Invalid section' }, { status: 400 });
     }
 
@@ -53,8 +56,9 @@ export async function POST(
 ) {
   try {
     const { id, section } = await params;
+    const validSections = getAvailableSectionIds();
 
-    if (!['architecture', 'deployment', 'dataflow', 'users'].includes(section)) {
+    if (!validSections.includes(section)) {
       return NextResponse.json({ error: 'Invalid section' }, { status: 400 });
     }
 
@@ -104,15 +108,7 @@ export async function POST(
     }
 
     // Get business document if available
-    const businessDocument = fullSession.bddDocuments[0]?.contentJson as
-      | {
-          systemDesign?: string;
-          deployment?: string;
-          dataFlows?: string[];
-          stakeholders?: string[];
-          productOverview?: string;
-        }
-      | undefined;
+    const bddContent = (fullSession.bddDocuments[0]?.contentJson as unknown as BusinessDocument | undefined);
 
     const latestRun = await prisma.run.findFirst({
       where: { projectId: fullSession.projectId },
@@ -121,17 +117,16 @@ export async function POST(
 
     const repoAnalysis = latestRun?.repoAnalysis as RepoAnalysis | undefined;
 
-    // Generate HDD section
+    // Get section configuration
+    const sectionConfig = getSectionConfig(section);
+
+    // Generate HDD section with few-shot prompts
     console.log(`📋 [HDD] Generating ${section} for project ${fullSession.projectId} and session:`, id);
-    const content = await generateHDDSection(section as HDDSection, {
+    const content = await generateHDDSection(section, sectionConfig, {
       idea: fullSession.idea,
       context: fullSession.context,
       constraints: fullSession.constraints,
-      systemDesign: businessDocument?.systemDesign,
-      deployment: businessDocument?.deployment,
-      dataFlows: businessDocument?.dataFlows,
-      stakeholders: businessDocument?.stakeholders,
-      productOverview: businessDocument?.productOverview,
+      businessDocument: bddContent,
       repoAnalysis,
     });
 

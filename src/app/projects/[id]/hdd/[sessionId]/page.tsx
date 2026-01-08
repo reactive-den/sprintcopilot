@@ -4,14 +4,21 @@ import { use, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
-type HDDSection = 'architecture' | 'deployment' | 'dataflow' | 'users';
+interface HDDSectionConfig {
+  id: string;
+  label: string;
+  icon: string;
+  type: 'hld' | 'lld' | 'guide' | 'reference';
+  description: string;
+}
 
-const SECTIONS: { id: HDDSection; label: string; icon: string }[] = [
-  { id: 'architecture', label: 'Architecture', icon: '🏗️' },
-  { id: 'deployment', label: 'Deployment Steps', icon: '🚀' },
-  { id: 'dataflow', label: 'Data Flow', icon: '🔄' },
-  { id: 'users', label: 'Users', icon: '👥' },
-];
+interface HDDContent {
+  [key: string]: string;
+}
+
+interface LoadingState {
+  [key: string]: boolean;
+}
 
 export default function HDDPage({
   params,
@@ -20,80 +27,107 @@ export default function HDDPage({
 }) {
   const { id: projectId, sessionId } = use(params);
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<HDDSection>('architecture');
-  const [content, setContent] = useState<Record<HDDSection, string>>({
-    architecture: '',
-    deployment: '',
-    dataflow: '',
-    users: '',
-  });
-  const [loading, setLoading] = useState<Record<HDDSection, boolean>>({
-    architecture: false,
-    deployment: false,
-    dataflow: false,
-    users: false,
-  });
+  const [sections, setSections] = useState<HDDSectionConfig[]>([]);
+  const [activeSection, setActiveSection] = useState<string>('architecture');
+  const [content, setContent] = useState<HDDContent>({});
+  const [loading, setLoading] = useState<LoadingState>({});
   const [isGeneratingTickets, setIsGeneratingTickets] = useState(false);
+  const [isLoadingSections, setIsLoadingSections] = useState(true);
 
-  const loadSection = useCallback(async (section: HDDSection) => {
-    if (content[section]) {
+  // Fetch dynamic sections from API
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.sections && data.sections.length > 0) {
+            setSections(data.sections);
+            setActiveSection(data.sections[0].id);
+          } else {
+            // Fallback to default sections if none returned
+            setSections([
+              { id: 'architecture', label: 'Architecture', icon: '🏗️', type: 'hld', description: 'High-level system architecture' },
+              { id: 'deployment', label: 'Deployment', icon: '🚀', type: 'guide', description: 'Deployment steps' },
+              { id: 'dataflow', label: 'Data Flow', icon: '🔄', type: 'hld', description: 'Data flow diagrams' },
+              { id: 'users', label: 'Users', icon: '👥', type: 'guide', description: 'User documentation' },
+            ]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch sections:', error);
+        // Use default sections on error
+        setSections([
+          { id: 'architecture', label: 'Architecture', icon: '🏗️', type: 'hld', description: 'High-level system architecture' },
+          { id: 'deployment', label: 'Deployment', icon: '🚀', type: 'guide', description: 'Deployment steps' },
+          { id: 'dataflow', label: 'Data Flow', icon: '🔄', type: 'hld', description: 'Data flow diagrams' },
+          { id: 'users', label: 'Users', icon: '👥', type: 'guide', description: 'User documentation' },
+        ]);
+      } finally {
+        setIsLoadingSections(false);
+      }
+    };
+
+    fetchSections();
+  }, [sessionId]);
+
+  const loadSection = useCallback(async (sectionId: string) => {
+    if (content[sectionId]) {
       // Content already loaded in state
       return;
     }
 
-    setLoading((prev) => ({ ...prev, [section]: true }));
+    setLoading((prev) => ({ ...prev, [sectionId]: true }));
 
     try {
       // First try GET to fetch existing, then POST to generate if not found
-      let response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${section}`);
+      let response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`);
 
       if (!response.ok && response.status === 404) {
         // Not found, generate it
-        response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${section}`, {
+        response = await fetch(`/api/clarifier/sessions/${sessionId}/hdd/${sectionId}`, {
           method: 'POST',
         });
       }
 
       if (response.ok) {
         const { content: sectionContent } = await response.json();
-        setContent((prev) => ({ ...prev, [section]: sectionContent }));
+        setContent((prev) => ({ ...prev, [sectionId]: sectionContent }));
       } else {
         const error = await response.json();
         setContent((prev) => ({
           ...prev,
-          [section]: `# Error\n\nFailed to load ${section}: ${error.error || 'Unknown error'}`,
+          [sectionId]: `# Error\n\nFailed to load ${sectionId}: ${error.error || 'Unknown error'}`,
         }));
       }
     } catch (error) {
-      console.error(`Failed to load ${section}:`, error);
+      console.error(`Failed to load ${sectionId}:`, error);
       setContent((prev) => ({
         ...prev,
-        [section]: `# Error\n\nFailed to load ${section}. Please try again.`,
+        [sectionId]: `# Error\n\nFailed to load ${sectionId}. Please try again.`,
       }));
     } finally {
-      setLoading((prev) => ({ ...prev, [section]: false }));
+      setLoading((prev) => ({ ...prev, [sectionId]: false }));
     }
   }, [content, sessionId]);
 
-  // Load all sections on mount
+  // Load active section on mount and when it changes
   useEffect(() => {
-    const loadAllSections = async () => {
-      for (const section of SECTIONS) {
-        await loadSection(section.id);
-      }
-    };
-    loadAllSections();
-  }, [loadSection]);
+    if (activeSection && !isLoadingSections) {
+      loadSection(activeSection);
+    }
+  }, [activeSection, isLoadingSections, loadSection]);
 
-  const downloadMarkdown = (section: HDDSection) => {
-    if (!content[section] || typeof window === 'undefined') return;
+  const downloadMarkdown = (sectionId: string) => {
+    if (!content[sectionId] || typeof window === 'undefined') return;
 
     try {
-      const blob = new Blob([content[section]], { type: 'text/markdown' });
+      const blob = new Blob([content[sectionId]], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
-      const sectionLabel = SECTIONS.find((s) => s.id === section)?.label || section;
+      const section = sections.find((s) => s.id === sectionId);
+      const sectionLabel = section?.label || sectionId;
       a.download = `${sectionLabel.replace(/\s+/g, '_').toLowerCase()}.md`;
       window.document.body.appendChild(a);
       a.click();
@@ -128,6 +162,27 @@ export default function HDDPage({
       setIsGeneratingTickets(false);
     }
   };
+
+  const getSectionTypeBadge = (type: string) => {
+    const badges: Record<string, { bg: string; text: string }> = {
+      hld: { bg: 'bg-blue-100 text-blue-700', text: 'HLD' },
+      lld: { bg: 'bg-purple-100 text-purple-700', text: 'LLD' },
+      guide: { bg: 'bg-green-100 text-green-700', text: 'Guide' },
+      reference: { bg: 'bg-gray-100 text-gray-700', text: 'Ref' },
+    };
+    return badges[type] || badges.guide;
+  };
+
+  if (isLoadingSections) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading sections...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
@@ -170,26 +225,35 @@ export default function HDDPage({
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-6 h-[calc(100vh-120px)]">
           {/* Left Sidebar - Section List */}
-          <div className="w-64 bg-white rounded-xl shadow-lg p-4 border border-gray-200">
+          <div className="w-72 bg-white rounded-xl shadow-lg p-4 border border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Sections</h2>
             <nav className="space-y-2">
-              {SECTIONS.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
-                    activeSection === section.id
-                      ? 'bg-indigo-100 text-indigo-700 font-semibold shadow-md'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="text-xl">{section.icon}</span>
-                  <span>{section.label}</span>
-                  {loading[section.id] && (
-                    <div className="ml-auto w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  )}
-                </button>
-              ))}
+              {sections.map((section) => {
+                const badge = getSectionTypeBadge(section.type);
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
+                      activeSection === section.id
+                        ? 'bg-indigo-100 text-indigo-700 font-semibold shadow-md'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-xl">{section.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate">{section.label}</div>
+                      <div className="text-xs text-gray-400 truncate">{section.description}</div>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${badge.bg}`}>
+                      {badge.text}
+                    </span>
+                    {loading[section.id] && (
+                      <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                  </button>
+                );
+              })}
             </nav>
           </div>
 
@@ -197,9 +261,21 @@ export default function HDDPage({
           <div className="flex-1 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
             {/* Content Header */}
             <div className="border-b border-gray-200 p-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">
-                {SECTIONS.find((s) => s.id === activeSection)?.label}
-              </h2>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">
+                  {sections.find((s) => s.id === activeSection)?.icon}
+                </span>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {sections.find((s) => s.id === activeSection)?.label}
+                  </h2>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${getSectionTypeBadge(sections.find((s) => s.id === activeSection)?.type || 'guide').bg}`}>
+                      {getSectionTypeBadge(sections.find((s) => s.id === activeSection)?.type || 'guide').text}
+                    </span>
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={() => downloadMarkdown(activeSection)}
                 disabled={!content[activeSection] || loading[activeSection]}

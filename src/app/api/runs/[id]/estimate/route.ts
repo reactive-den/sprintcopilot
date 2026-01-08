@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { handleApiError, NotFoundError } from '@/lib/errors';
 import { estimateTickets } from '@/lib/estimator';
+import { prioritizeTickets } from '@/lib/prioritizer';
 
 export async function POST(
   request: NextRequest,
@@ -40,16 +41,26 @@ export async function POST(
     // Estimate tickets using AI
     const estimatedTickets = await estimateTickets(ticketsForEstimation);
 
-    // Update tickets in database with new estimates
-    const updatePromises = estimatedTickets.map((estimatedTicket, index) => {
-      const originalTicket = run.tickets[index];
-      if (!originalTicket) return null;
+    // Prioritize tickets using AI
+    const prioritizedTickets = await prioritizeTickets(estimatedTickets);
+
+    // Update tickets in database with new estimates and priorities
+    const updatePromises = run.tickets.map((originalTicket, index) => {
+      const estimatedTicket =
+        estimatedTickets.find((ticket) => ticket.title === originalTicket.title) ||
+        estimatedTickets[index];
+      const prioritizedTicket =
+        prioritizedTickets.find((ticket) => ticket.title === originalTicket.title) ||
+        prioritizedTickets[index];
+
+      if (!estimatedTicket) return null;
 
       return prisma.ticket.update({
         where: { id: originalTicket.id },
         data: {
           estimateHours: estimatedTicket.estimateHours,
           tshirtSize: estimatedTicket.tshirtSize as 'XS' | 'S' | 'M' | 'L' | 'XL',
+          priority: prioritizedTicket?.priority ?? originalTicket.priority,
         },
       });
     });

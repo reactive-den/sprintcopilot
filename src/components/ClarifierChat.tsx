@@ -26,8 +26,26 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const autoFinalizedRef = useRef(false);
 
-  // Count questions asked by AI (assistant messages)
-  const questionCount = messages.filter((msg) => msg.role === 'assistant').length;
+  // Check if a message is a setup question (like GitHub URL) - should not count toward question limit
+  const isSetupQuestion = (content: string) => {
+    const lower = content.toLowerCase();
+    return (
+      lower.includes('github') ||
+      lower.includes('repository url') ||
+      lower.includes('repo url') ||
+      lower.includes('no repo')
+    );
+  };
+
+  // Check if an assistant message actually contains a question (ends with ?)
+  const isQuestion = (content: string) => {
+    return content.trim().endsWith('?');
+  };
+
+  // Count questions asked by AI (excluding setup questions like GitHub URL and thank you messages)
+  const questionCount = messages.filter(
+    (msg) => msg.role === 'assistant' && !isSetupQuestion(msg.content) && isQuestion(msg.content)
+  ).length;
   const maxQuestions = 5;
   const isQuestionLimitReached = questionCount >= maxQuestions;
 

@@ -65,15 +65,27 @@ export async function POST(
       );
     }
 
-    // Check question limit (count assistant messages)
-    const questionCount = session.messages.filter((msg) => msg.role === 'assistant').length;
-    const maxQuestions = 5;
-    if (questionCount >= maxQuestions) {
-      return NextResponse.json(
-        { error: 'Maximum number of questions (10) has been reached. Please finalize the session.' },
-        { status: 400 }
+    // Check if a message is a setup question (like GitHub URL) - should not count toward question limit
+    const isSetupQuestion = (content: string) => {
+      const lower = content.toLowerCase();
+      return (
+        lower.includes('github') ||
+        lower.includes('repository url') ||
+        lower.includes('repo url') ||
+        lower.includes('no repo')
       );
-    }
+    };
+
+    // Check if an assistant message actually contains a question (ends with ?)
+    const isQuestion = (content: string) => {
+      return content.trim().endsWith('?');
+    };
+
+    // Count questions asked by AI (excluding setup questions and thank you messages)
+    const questionCount = session.messages.filter(
+      (msg) => msg.role === 'assistant' && !isSetupQuestion(msg.content) && isQuestion(msg.content)
+    ).length;
+    const maxQuestions = 5;
 
     // Save user message
     const userMessage = await prisma.clarifierMessage.create({
@@ -112,7 +124,8 @@ export async function POST(
         repoUrl: updatedRepoUrl,
         messages: session.messages,
       },
-      content
+      content,
+      questionCount
     );
 
     // Save AI response
