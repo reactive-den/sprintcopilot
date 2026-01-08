@@ -31,6 +31,11 @@ interface Folder {
   }>;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -43,6 +48,10 @@ export default function AdminPage() {
   const [showAddSprintModal, setShowAddSprintModal] = useState(false);
   const [featureDescription, setFeatureDescription] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   // Fetch projects from ClickUp on mount
   useEffect(() => {
@@ -111,6 +120,8 @@ export default function AdminPage() {
 
   const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedProjectId(e.target.value);
+    setChatMessages([]);
+    setChatError(null);
   };
 
   const toggleFolder = (folderId: string) => {
@@ -214,6 +225,55 @@ export default function AdminPage() {
       alert(`Failed to generate tickets: ${errorMessage}\n\nPlease check the console for more details.`);
     } finally {
       setIsAddingSprint(false);
+    }
+  };
+
+  const handleChatSend = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setChatError(null);
+
+    if (!selectedProjectId) {
+      setChatError('Select a project before asking a question.');
+      return;
+    }
+
+    const trimmed = chatInput.trim();
+    if (!trimmed) return;
+
+    const nextMessages: ChatMessage[] = [
+      ...chatMessages,
+      { role: 'user', content: trimmed },
+    ];
+
+    setChatMessages(nextMessages);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: selectedProjectId,
+          messages: nextMessages,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        setChatError(error.error || 'Failed to fetch progress.');
+        return;
+      }
+
+      const data = await response.json();
+      if (data?.reply) {
+        setChatMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch admin progress:', error);
+      setChatError('Failed to fetch progress.');
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -356,6 +416,74 @@ export default function AdminPage() {
               <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
               <span>Back to Project</span>
             </button>
+
+            {/* Admin Progress Chat */}
+            <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <span>💬</span>
+                  <span>Admin Progress Chat</span>
+                </h2>
+                <span className="text-sm text-gray-500">
+                  Ask about project, sprint, or assignee progress
+                </span>
+              </div>
+
+              <div className="border border-indigo-100 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/40 to-purple-50/40">
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
+                  {chatMessages.length === 0 ? (
+                    <p className="text-gray-500 text-sm">
+                      Ask a question like "How is the current sprint going?"
+                    </p>
+                  ) : (
+                    chatMessages.map((message, index) => (
+                      <div
+                        key={`${message.role}-${index}`}
+                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm leading-relaxed ${
+                            message.role === 'user'
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-white text-gray-800 border border-indigo-100'
+                          } whitespace-pre-wrap`}
+                        >
+                          {message.content}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  {isChatLoading && (
+                    <div className="flex justify-start">
+                      <div className="px-4 py-3 rounded-2xl bg-white text-gray-500 border border-indigo-100 text-sm">
+                        Thinking...
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {chatError && (
+                <p className="mt-3 text-sm text-red-600">{chatError}</p>
+              )}
+
+              <form onSubmit={handleChatSend} className="mt-4 flex gap-3">
+                <input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask about progress, blockers, or assignees..."
+                  className="flex-1 px-4 py-3 bg-gray-50 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm"
+                  disabled={isChatLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={isChatLoading || !chatInput.trim()}
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
 
             {/* Folders Section */}
             <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
