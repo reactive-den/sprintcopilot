@@ -13,6 +13,8 @@
     "@langchain/core": "^0.3.78",
     "@langchain/langgraph": "^0.4.9",
     "@langchain/openai": "^0.6.16",
+    "@aws-sdk/client-s3": "^3.862.0",
+    "@aws-sdk/s3-request-presigner": "^3.862.0",
     "@prisma/client": "6.17.1",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "^5.90.3",

@@ -46,6 +46,21 @@ const envSchema = z.object({
   // GitHub Configuration (Optional)
   GITHUB_TOKEN: z.string().optional().or(z.literal('')),
 
+  // S3 Configuration (Optional)
+  S3_BUCKET: z.string().optional().or(z.literal('')),
+  S3_REGION: z.string().optional().or(z.literal('')),
+  S3_UPLOAD_PREFIX: z.string().optional().default('uploads'),
+  S3_PRESIGN_EXPIRES_SECONDS: z
+    .string()
+    .default('900')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0 && val <= 3600, 'S3_PRESIGN_EXPIRES_SECONDS must be between 1 and 3600'),
+  S3_UPLOAD_MAX_BYTES: z
+    .string()
+    .default('52428800')
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => val > 0, 'S3_UPLOAD_MAX_BYTES must be positive'),
+
   // Application Configuration
   MAX_FEATURE_LENGTH: z
     .string()
