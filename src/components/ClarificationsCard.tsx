@@ -1,6 +1,7 @@
 'use client';
 
 import type { Clarifications } from '@/types';
+import { HelpCircle, Lightbulb, Target } from 'lucide-react';
 
 interface ClarificationsCardProps {
   clarifications: Clarifications;
@@ -15,15 +16,15 @@ export function ClarificationsCard({
 }: ClarificationsCardProps) {
   if (isLoading) {
     return (
-      <div className={`bg-white rounded-3xl shadow-xl p-8 border border-blue-100 ${className}`}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl animate-pulse"></div>
-          <div className="h-8 bg-gray-200 rounded-lg w-48 animate-pulse"></div>
+      <div className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-[color:rgba(37,99,235,0.12)]"></div>
+          <div className="h-5 w-40 rounded bg-[color:rgba(15,23,42,0.08)]"></div>
         </div>
-        <div className="space-y-4">
-          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-5/6"></div>
+        <div className="space-y-3">
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)]"></div>
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)] w-3/4"></div>
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)] w-5/6"></div>
         </div>
       </div>
     );
@@ -40,30 +41,30 @@ export function ClarificationsCard({
 
   return (
     <div
-      className={`bg-white rounded-3xl shadow-xl p-8 border border-blue-100 hover:shadow-2xl transition-shadow duration-300 ${className}`}
+      className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}
     >
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-          <span className="text-2xl">🎯</span>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+          <HelpCircle className="h-5 w-5 text-[color:var(--color-primary)]" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900">Clarifications</h2>
+        <h2 className="text-xl font-semibold text-[color:var(--color-text)]">Clarifications</h2>
       </div>
 
       {/* Questions Section */}
       {hasQuestions && (
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>❓</span>
-            <span>Key Questions</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <HelpCircle className="h-4 w-4 text-[color:var(--color-primary)]" />
+            <span>Key questions</span>
           </h3>
           <div className="space-y-3">
             {clarifications.questions!.map((question: string, index: number) => (
               <div
                 key={index}
-                className="flex gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100 hover:border-blue-200 transition-colors"
+                className="flex gap-3 rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4"
               >
-                <span className="text-blue-600 font-bold flex-shrink-0">{index + 1}.</span>
-                <p className="text-gray-700 flex-1">{question}</p>
+                <span className="text-sm font-semibold text-[color:var(--color-primary)]">{index + 1}.</span>
+                <p className="text-sm text-[color:rgba(15,23,42,0.75)]">{question}</p>
               </div>
             ))}
           </div>
@@ -73,18 +74,18 @@ export function ClarificationsCard({
       {/* Assumptions Section */}
       {hasAssumptions && (
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>💡</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <Lightbulb className="h-4 w-4 text-[color:var(--color-primary)]" />
             <span>Assumptions</span>
           </h3>
           <div className="space-y-3">
             {clarifications.assumptions!.map((assumption: string, index: number) => (
               <div
                 key={index}
-                className="flex gap-3 p-4 bg-cyan-50 rounded-xl border border-cyan-100 hover:border-cyan-200 transition-colors"
+                className="flex gap-3 rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4"
               >
-                <span className="text-cyan-600 font-bold flex-shrink-0">•</span>
-                <p className="text-gray-700 flex-1">{assumption}</p>
+                <span className="text-sm text-[color:rgba(15,23,42,0.55)]">•</span>
+                <p className="text-sm text-[color:rgba(15,23,42,0.75)]">{assumption}</p>
               </div>
             ))}
           </div>
@@ -93,12 +94,14 @@ export function ClarificationsCard({
 
       {/* Scope Section */}
       {hasScope && (
-        <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border border-blue-100">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>🎯</span>
-            <span>Project Scope</span>
+        <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-5">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <Target className="h-4 w-4 text-[color:var(--color-primary)]" />
+            <span>Project scope</span>
           </h3>
-          <p className="text-gray-700 leading-relaxed">{clarifications.scope}</p>
+          <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+            {clarifications.scope}
+          </p>
         </div>
       )}
     </div>

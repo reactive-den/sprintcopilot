@@ -3,6 +3,7 @@
 import { ClarifierChat } from '@/components/ClarifierChat';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useState } from 'react';
+import { AlertTriangle, ChevronLeft, Loader2, Sparkles } from 'lucide-react';
 
 export default function ClarifyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
@@ -52,10 +53,12 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Initializing clarifier session...</p>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+          <p className="text-sm font-semibold text-[color:var(--color-text)]">
+            Initializing clarifier session...
+          </p>
         </div>
       </div>
     );
@@ -63,19 +66,19 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
-          <div className="text-center">
-            <span className="text-4xl mb-4 block">❌</span>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold"
-            >
-              Go Back
-            </button>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-[color:rgba(185,28,28,0.3)] bg-[color:var(--color-surface)] p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(185,28,28,0.1)]">
+            <AlertTriangle className="h-5 w-5 text-[color:var(--color-danger)]" />
           </div>
+          <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">Unable to load</h2>
+          <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">{error}</p>
+          <button
+            onClick={() => router.push('/')}
+            className="mt-6 h-11 rounded-lg bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            Go back
+          </button>
         </div>
       </div>
     );
@@ -86,29 +89,28 @@ export default function ClarifyPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-[color:var(--color-background)] p-4 md:p-8">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-8 animate-fade-in">
           <button
             onClick={() => router.push('/')}
-            className="text-indigo-600 hover:text-indigo-700 font-semibold mb-6 flex items-center gap-2 transition-colors group"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:text-[color:rgba(15,23,42,0.7)]"
           >
-            <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+            <ChevronLeft className="h-4 w-4" />
             <span>Back to Home</span>
           </button>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+          <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <span className="text-2xl">✨</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color:rgba(37,99,235,0.12)]">
+                <Sparkles className="h-5 w-5 text-[color:var(--color-primary)]" />
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Feature Clarification
+                <h1 className="text-2xl font-semibold text-[color:var(--color-text)]">
+                  Feature clarification
                 </h1>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Let&apos;s work together to understand your feature requirements. I&apos;ll ask
-                  you thoughtful questions one at a time to ensure we capture everything needed for
-                  your sprint plan.
+                <p className="mt-2 text-sm leading-relaxed text-[color:rgba(15,23,42,0.7)]">
+                  Answer a few targeted questions so we can lock scope and generate a precise sprint
+                  plan.
                 </p>
               </div>
             </div>

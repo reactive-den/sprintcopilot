@@ -2,6 +2,7 @@
 
 import type { Ticket } from '@/types';
 import { Fragment, useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, ClipboardList, Save } from 'lucide-react';
 
 interface TicketsTableProps {
   tickets: Ticket[];
@@ -75,7 +76,7 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
           const updatedTickets = tickets.map((t) => (t.id === ticket.id ? updatedTicket : t));
           onTicketsUpdate(updatedTickets);
         }
-        alert('✅ Ticket updated successfully!');
+        alert('Ticket updated successfully.');
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to update ticket');
@@ -90,14 +91,14 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
 
   if (isLoading) {
     return (
-      <div className={`bg-white rounded-3xl shadow-xl p-8 border border-orange-100 ${className}`}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl animate-pulse"></div>
-          <div className="h-8 bg-gray-200 rounded-lg w-48 animate-pulse"></div>
+      <div className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-[color:rgba(37,99,235,0.12)]"></div>
+          <div className="h-5 w-40 rounded bg-[color:rgba(15,23,42,0.08)]"></div>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+            <div key={i} className="h-12 rounded bg-[color:rgba(15,23,42,0.06)]"></div>
           ))}
         </div>
       </div>
@@ -110,17 +111,17 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
 
   return (
     <div
-      className={`bg-white rounded-3xl shadow-xl p-8 border border-orange-100 hover:shadow-2xl transition-shadow duration-300 ${className}`}
+      className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-            <span className="text-2xl">📋</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+            <ClipboardList className="h-5 w-5 text-[color:var(--color-primary)]" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Sprint Tickets</h2>
+          <h2 className="text-xl font-semibold text-[color:var(--color-text)]">Sprint tickets</h2>
         </div>
-        <div className="px-4 py-2 bg-gradient-to-r from-orange-100 to-red-100 rounded-full">
-          <span className="text-sm font-bold text-orange-700">{tickets.length} tickets</span>
+        <div className="rounded-full border border-[color:rgba(15,23,42,0.12)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
+          {tickets.length} tickets
         </div>
       </div>
 
@@ -128,66 +129,60 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-gray-200">
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <tr className="border-b border-[color:rgba(15,23,42,0.12)]">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Title
               </th>
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Size
               </th>
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Hours
               </th>
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Sprint
               </th>
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Priority
               </th>
-              <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Tags
               </th>
-              <th className="px-4 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-[color:rgba(15,23,42,0.6)]">
                 Details
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-[color:rgba(15,23,42,0.08)]">
             {tickets.map((ticket) => {
               const isExpanded = expandedRows.has(ticket.id);
               return (
                 <Fragment key={ticket.id}>
                   <tr
-                    className="hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-colors cursor-pointer"
+                    className="cursor-pointer transition hover:bg-[color:rgba(37,99,235,0.04)]"
                     onClick={() => toggleRow(ticket.id)}
                   >
-                    <td className="px-4 py-4 text-sm font-medium text-gray-900 max-w-xs">
+                    <td className="px-4 py-3 text-sm font-medium text-[color:var(--color-text)] max-w-xs">
                       <div className="flex items-center gap-2">
                         <span>{ticket.title}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm">
-                      <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-sm">
+                      <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                         {ticket.tshirtSize}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-sm">
-                      <span className="font-semibold text-gray-700">{ticket.estimateHours}h</span>
+                      <span className="text-sm text-[color:rgba(15,23,42,0.7)]">{ticket.estimateHours}h</span>
                     </td>
                     <td className="px-4 py-4 text-sm">
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                      <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                         Sprint {ticket.sprint}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-sm">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                          ticket.priority >= 8
-                            ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
-                            : ticket.priority >= 5
-                            ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
-                            : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
-                        }`}
+                        className="rounded-full border border-[color:rgba(37,99,235,0.3)] bg-[color:rgba(37,99,235,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--color-primary)]"
                       >
                         P{ticket.priority}
                       </span>
@@ -197,13 +192,13 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                         {ticket.tags.slice(0, 2).map((tag, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
+                            className="rounded border border-[color:rgba(15,23,42,0.12)] px-2 py-1 text-[11px] text-[color:rgba(15,23,42,0.6)]"
                           >
                             {tag}
                           </span>
                         ))}
                         {ticket.tags.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                          <span className="rounded border border-[color:rgba(15,23,42,0.12)] px-2 py-1 text-[11px] text-[color:rgba(15,23,42,0.6)]">
                             +{ticket.tags.length - 2}
                           </span>
                         )}
@@ -211,41 +206,36 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                     </td>
                     <td className="px-4 py-4 text-center text-sm">
                       <button
-                        className="text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[color:rgba(15,23,42,0.12)] text-[color:rgba(15,23,42,0.6)] transition hover:border-[color:rgba(15,23,42,0.24)]"
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleRow(ticket.id);
                         }}
                       >
-                        {isExpanded ? '▲' : '▼'}
+                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </button>
                     </td>
                   </tr>
                   {isExpanded && (
                     <tr>
-                      <td
-                        colSpan={7}
-                        className="px-4 py-6 bg-gradient-to-r from-orange-50 to-red-50"
-                      >
+                      <td colSpan={7} className="px-4 py-6 bg-[color:var(--color-background)]">
                         <div className="space-y-4">
                           {/* Description */}
                           <div>
-                            <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                              <span>📝</span>
-                              <span>Description</span>
+                            <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
+                              Description
                             </h4>
-                            <p className="text-gray-700 leading-relaxed bg-white p-4 rounded-lg">
+                            <p className="rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-4 text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
                               {ticket.description}
                             </p>
                           </div>
 
                           {/* Acceptance Criteria */}
                           <div>
-                            <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                              <span>✅</span>
-                              <span>Acceptance Criteria</span>
+                            <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
+                              Acceptance criteria
                             </h4>
-                            <div className="text-gray-700 leading-relaxed bg-white p-4 rounded-lg whitespace-pre-line">
+                            <div className="rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-4 text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)] whitespace-pre-line">
                               {ticket.acceptanceCriteria}
                             </div>
                           </div>
@@ -253,15 +243,14 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                           {/* Dependencies */}
                           {ticket.dependencies.length > 0 && (
                             <div>
-                              <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                <span>🔗</span>
-                                <span>Dependencies</span>
+                              <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
+                                Dependencies
                               </h4>
                               <div className="flex flex-wrap gap-2">
                                 {ticket.dependencies.map((dep, idx) => (
                                   <span
                                     key={idx}
-                                    className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium"
+                                    className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]"
                                   >
                                     {dep}
                                   </span>
@@ -273,15 +262,14 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                           {/* All Tags */}
                           {ticket.tags.length > 0 && (
                             <div>
-                              <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                <span>🏷️</span>
-                                <span>Tags</span>
+                              <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
+                                Tags
                               </h4>
                               <div className="flex flex-wrap gap-2">
                                 {ticket.tags.map((tag, idx) => (
                                   <span
                                     key={idx}
-                                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm"
+                                    className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]"
                                   >
                                     {tag}
                                   </span>
@@ -307,62 +295,53 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
           return (
             <div
               key={ticket.id}
-              className="border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-orange-300 transition-colors"
+              className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] overflow-hidden transition hover:border-[color:rgba(37,99,235,0.3)]"
             >
               <div
-                className="p-4 bg-gradient-to-r from-orange-50 to-red-50 cursor-pointer"
+                className="cursor-pointer bg-[color:var(--color-background)] p-4"
                 onClick={() => toggleRow(ticket.id)}
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="font-bold text-gray-900 flex-1">{ticket.title}</h3>
-                  <button className="text-indigo-600 font-bold text-xl flex-shrink-0">
-                    {isExpanded ? '▲' : '▼'}
+                  <h3 className="flex-1 text-sm font-semibold text-[color:var(--color-text)]">{ticket.title}</h3>
+                  <button className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:rgba(15,23,42,0.12)] text-[color:rgba(15,23,42,0.6)]">
+                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full text-xs font-bold">
+                  <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                     {ticket.tshirtSize}
                   </span>
-                  <span className="px-3 py-1 bg-white text-gray-700 rounded-full text-xs font-bold">
+                  <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                     {ticket.estimateHours}h
                   </span>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold">
+                  <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                     Sprint {ticket.sprint}
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      ticket.priority >= 8
-                        ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
-                        : ticket.priority >= 5
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
-                        : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
-                    }`}
+                    className="rounded-full border border-[color:rgba(37,99,235,0.3)] bg-[color:rgba(37,99,235,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--color-primary)]"
                   >
                     P{ticket.priority}
                   </span>
                 </div>
               </div>
               {isExpanded && (
-                <div className="p-4 bg-white space-y-4 border-t-2 border-gray-200">
+                <div className="space-y-4 border-t border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                        <span>📝</span>
-                        <span>Description</span>
-                      </h4>
+                      <h4 className="text-sm font-semibold text-[color:var(--color-text)]">Description</h4>
                       <button
                         onClick={() => handleSaveTicket(ticket)}
                         disabled={savingTicketId === ticket.id}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-all flex items-center gap-2"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-3 py-2 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {savingTicketId === ticket.id ? (
                           <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></div>
                             <span>Saving...</span>
                           </>
                         ) : (
                           <>
-                            <span>💾</span>
+                            <Save className="h-4 w-4" />
                             <span>Save</span>
                           </>
                         )}
@@ -371,38 +350,32 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                     <textarea
                       value={editedTickets.get(ticket.id)?.description || ticket.description}
                       onChange={(e) => handleDescriptionChange(ticket.id, e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none text-sm"
+                      className="w-full rounded-lg border border-[color:rgba(15,23,42,0.16)] px-4 py-3 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)]"
                       rows={8}
                       placeholder="Enter objective (up to 10 lines) and acceptance criteria..."
                     />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                      <span>✅</span>
-                      <span>Acceptance Criteria</span>
-                    </h4>
+                    <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">Acceptance criteria</h4>
                     <textarea
                       value={editedTickets.get(ticket.id)?.acceptanceCriteria || ticket.acceptanceCriteria}
                       onChange={(e) => handleAcceptanceCriteriaChange(ticket.id, e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none text-sm font-mono"
+                      className="w-full rounded-lg border border-[color:rgba(15,23,42,0.16)] px-4 py-3 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)]"
                       rows={10}
                       placeholder="Enter acceptance criteria (one per line, up to 10 items)..."
                     />
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p className="mt-2 text-xs text-[color:rgba(15,23,42,0.55)]">
                       Enter one acceptance criterion per line (up to 10 items). Each line will become a bullet point.
                     </p>
                   </div>
                   {ticket.dependencies.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                        <span>🔗</span>
-                        <span>Dependencies</span>
-                      </h4>
+                      <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">Dependencies</h4>
                       <div className="flex flex-wrap gap-2">
                         {ticket.dependencies.map((dep, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium"
+                            className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]"
                           >
                             {dep}
                           </span>
@@ -412,15 +385,12 @@ export function TicketsTable({ tickets, isLoading = false, className = '', onTic
                   )}
                   {ticket.tags.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                        <span>🏷️</span>
-                        <span>Tags</span>
-                      </h4>
+                      <h4 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">Tags</h4>
                       <div className="flex flex-wrap gap-2">
                         {ticket.tags.map((tag, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                            className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]"
                           >
                             {tag}
                           </span>

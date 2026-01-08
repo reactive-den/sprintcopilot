@@ -10,6 +10,16 @@ import { ClarificationsCard } from '@/components/ClarificationsCard';
 import { HLDCard } from '@/components/HLDCard';
 import { TicketsTable } from '@/components/TicketsTable';
 import { RepoAnalysisCard } from '@/components/RepoAnalysisCard';
+import {
+  AlertTriangle,
+  Calculator,
+  Compass,
+  FileText,
+  FolderKanban,
+  LayoutList,
+  Loader2,
+  UploadCloud,
+} from 'lucide-react';
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params);
@@ -94,13 +104,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   if (isProjectLoading || (isLoading && activeRunId)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-          </div>
-          <p className="text-xl font-semibold text-gray-700">Loading your project...</p>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="h-8 w-8 animate-spin text-[color:var(--color-primary)] mx-auto" />
+          <p className="text-sm font-semibold text-[color:var(--color-text)]">Loading your project...</p>
         </div>
       </div>
     );
@@ -108,18 +115,20 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   if (!activeRunId && project && project.runs.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center">
-          <div className="text-6xl mb-4">🧭</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No runs yet</h2>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+            <FolderKanban className="h-5 w-5 text-[color:var(--color-primary)]" />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">No runs yet</h2>
+          <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
             Start a clarifier session to generate your first repo analysis and HLD.
           </p>
           <button
             onClick={() => router.push(`/projects/${projectId}/clarify`)}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold"
+            className="mt-6 h-11 rounded-lg bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
           >
-            Start Clarifier
+            Start clarifier
           </button>
         </div>
       </div>
@@ -128,11 +137,15 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   if (error || !run) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md">
-          <div className="text-6xl mb-4 text-center">😞</div>
-          <h2 className="text-2xl font-bold text-red-600 mb-2 text-center">Oops!</h2>
-          <p className="text-gray-600 text-center">{error?.message || 'Run not found'}</p>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-[color:rgba(185,28,28,0.3)] bg-[color:var(--color-surface)] p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(185,28,28,0.1)]">
+            <AlertTriangle className="h-5 w-5 text-[color:var(--color-danger)]" />
+          </div>
+          <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-danger)]">Run unavailable</h2>
+          <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
+            {error?.message || 'Run not found'}
+          </p>
         </div>
       </div>
     );
@@ -141,39 +154,37 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const isProcessing = run.status !== 'COMPLETED' && run.status !== 'FAILED';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-[color:var(--color-background)]">
       {/* Loading Overlay for ClickUp Export */}
       {isExporting && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
-            <div className="relative w-16 h-16 mx-auto mb-6">
-              <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Creating ClickUp Tasks</h3>
-            <p className="text-gray-600 mb-4">
-              Please wait while we create tasks in ClickUp...
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:rgba(15,23,42,0.4)]">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 text-center shadow-sm">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+            <h3 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">
+              Creating ClickUp tasks
+            </h3>
+            <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
+              Please wait while we create tasks in ClickUp.
             </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-            </div>
           </div>
         </div>
       )}
       <div className="container mx-auto px-4 py-8">
         {/* Header Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-          <div className="flex items-start justify-between mb-6">
+        <div className="mb-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+          <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">🚀</span>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+                  <FolderKanban className="h-5 w-5 text-[color:var(--color-primary)]" />
                 </div>
-                <h1 className="text-4xl font-black text-gray-900">{run.project.title}</h1>
+                <h1 className="text-2xl font-semibold text-[color:var(--color-text)]">
+                  {run.project.title}
+                </h1>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">{run.project.problem}</p>
+              <p className="mt-3 text-sm leading-relaxed text-[color:rgba(15,23,42,0.7)]">
+                {run.project.problem}
+              </p>
             </div>
           </div>
 
@@ -183,14 +194,14 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           {/* Action Buttons */}
           {run.status === 'COMPLETED' && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {sessionId && (
                   <button
                     onClick={() => router.push(`/projects/${projectId}/business-document/${sessionId}`)}
-                    className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)]"
                   >
-                    <span>📄</span>
-                    <span>View Business Document</span>
+                    <FileText className="h-4 w-4 text-[color:var(--color-primary)]" />
+                    <span>Business document</span>
                   </button>
                 )}
                 {run.repoAnalysis && (
@@ -198,35 +209,35 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                     onClick={() => {
                       router.push(`/projects/${projectId}?showRepoDetails=true`);
                     }}
-                    className="px-6 py-4 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)]"
                   >
-                    <span>🧭</span>
-                    <span>View Repo Analysis</span>
+                    <Compass className="h-4 w-4 text-[color:var(--color-primary)]" />
+                    <span>Repo analysis</span>
                   </button>
                 )}
                 {sessionId && (
                   <button
                     onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
-                    className="px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)]"
                   >
-                    <span>📋</span>
-                    <span>View HLDs and LLDs</span>
+                    <LayoutList className="h-4 w-4 text-[color:var(--color-primary)]" />
+                    <span>HLDs and LLDs</span>
                   </button>
                 )}
                 <button
                   onClick={() => createClickUpTasks(run.id)}
                   disabled={isExporting}
-                  className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isExporting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Creating...</span>
                     </>
                   ) : (
                     <>
-                      <span>✅</span>
-                      <span>Create ClickUp Tasks</span>
+                      <UploadCloud className="h-4 w-4" />
+                      <span>Create ClickUp tasks</span>
                     </>
                   )}
                 </button>
@@ -234,17 +245,17 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                   <button
                     onClick={handleEstimateTickets}
                     disabled={isEstimating}
-                    className="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isEstimating ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <Loader2 className="h-4 w-4 animate-spin text-[color:var(--color-primary)]" />
                         <span>Estimating...</span>
                       </>
                     ) : (
                       <>
-                        <span>📊</span>
-                        <span>Estimate Tickets</span>
+                        <Calculator className="h-4 w-4 text-[color:var(--color-primary)]" />
+                        <span>Estimate tickets</span>
                       </>
                     )}
                   </button>
@@ -254,11 +265,11 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           )}
 
           {run.status === 'FAILED' && (
-            <div className="mt-6 p-6 bg-red-50 border-2 border-red-200 rounded-2xl flex items-start gap-4">
-              <span className="text-3xl">❌</span>
+            <div className="mt-6 flex items-start gap-3 rounded-xl border border-[color:rgba(185,28,28,0.3)] bg-[color:rgba(185,28,28,0.06)] p-4">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-[color:var(--color-danger)]" />
               <div className="flex-1">
-                <p className="font-semibold text-red-900 mb-1">Pipeline Failed</p>
-                <p className="text-sm text-red-600">{run.errorMessage}</p>
+                <p className="text-sm font-semibold text-[color:var(--color-danger)]">Pipeline failed</p>
+                <p className="text-sm text-[color:rgba(15,23,42,0.7)]">{run.errorMessage}</p>
               </div>
             </div>
           )}
@@ -288,4 +299,3 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 }
-

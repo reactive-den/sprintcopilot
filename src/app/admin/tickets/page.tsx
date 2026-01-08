@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { Folder } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,25 +17,23 @@ export default async function AdminTicketsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-[color:var(--color-background)]">
       <div className="container mx-auto px-4 py-10">
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100 mb-8">
+        <div className="mb-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-4xl font-black text-gray-900 mb-2">Admin Ticket View</h1>
-              <p className="text-gray-600">
+              <h1 className="text-2xl font-semibold text-[color:var(--color-text)]">Admin ticket view</h1>
+              <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
                 All generated tickets with project context, estimates, and details.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full">
-                <span className="text-sm font-bold text-indigo-700">
+              <div className="rounded-full border border-[color:rgba(15,23,42,0.12)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                   {tickets.length} tickets
-                </span>
               </div>
               <Link
                 href="/"
-                className="px-4 py-2 rounded-full border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-50 transition-colors"
+                className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-4 py-2 text-xs font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)]"
               >
                 Back to Home
               </Link>
@@ -43,10 +42,12 @@ export default async function AdminTicketsPage() {
         </div>
 
         {tickets.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 text-center">
-            <div className="text-5xl mb-4">🗂️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No tickets yet</h2>
-            <p className="text-gray-600">Run a project to generate tickets for this list.</p>
+          <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+              <Folder className="h-5 w-5 text-[color:var(--color-primary)]" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">No tickets yet</h2>
+            <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">Run a project to generate tickets for this list.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -58,86 +59,78 @@ export default async function AdminTicketsPage() {
               return (
                 <div
                   key={ticket.id}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300"
+                  className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm"
                 >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-2">
-                      <h3 className="text-2xl font-bold text-gray-900">{ticket.title}</h3>
-                      <div className="text-sm text-gray-600 space-y-1">
+                      <h3 className="text-lg font-semibold text-[color:var(--color-text)]">{ticket.title}</h3>
+                      <div className="space-y-1 text-sm text-[color:rgba(15,23,42,0.7)]">
                         <div>
-                          <span className="font-semibold text-gray-700">Project:</span>{' '}
+                          <span className="font-semibold text-[color:var(--color-text)]">Project:</span>{' '}
                           {ticket.run.project.title}
                         </div>
                         <div>
-                          <span className="font-semibold text-gray-700">Run ID:</span> {ticket.run.id}
+                          <span className="font-semibold text-[color:var(--color-text)]">Run ID:</span> {ticket.run.id}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
-                          ticket.priority >= 8
-                            ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
-                            : ticket.priority >= 5
-                            ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
-                            : 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
-                        }`}
-                      >
+                      <span className="rounded-full border border-[color:rgba(37,99,235,0.3)] bg-[color:rgba(37,99,235,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--color-primary)]">
                         P{ticket.priority}
                       </span>
-                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                      <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs font-semibold text-[color:rgba(15,23,42,0.7)]">
                         {ticket.status}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="bg-gray-50 rounded-xl p-3">
-                      <div className="text-xs text-gray-500">Sprint</div>
-                      <div className="font-semibold text-gray-900">
+                  <div className="mt-4 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+                    <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-3">
+                      <div className="text-xs text-[color:rgba(15,23,42,0.55)]">Sprint</div>
+                      <div className="font-semibold text-[color:var(--color-text)]">
                         {ticket.sprint ?? 'TBD'}
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3">
-                      <div className="text-xs text-gray-500">Estimate</div>
-                      <div className="font-semibold text-gray-900">
+                    <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-3">
+                      <div className="text-xs text-[color:rgba(15,23,42,0.55)]">Estimate</div>
+                      <div className="font-semibold text-[color:var(--color-text)]">
                         {ticket.estimateHours ? `${ticket.estimateHours}h` : 'N/A'}
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3">
-                      <div className="text-xs text-gray-500">T-Shirt</div>
-                      <div className="font-semibold text-gray-900">
+                    <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-3">
+                      <div className="text-xs text-[color:rgba(15,23,42,0.55)]">T-shirt</div>
+                      <div className="font-semibold text-[color:var(--color-text)]">
                         {ticket.tshirtSize ?? 'N/A'}
                       </div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3">
-                      <div className="text-xs text-gray-500">Run Status</div>
-                      <div className="font-semibold text-gray-900">{ticket.run.status}</div>
+                    <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-3">
+                      <div className="text-xs text-[color:rgba(15,23,42,0.55)]">Run status</div>
+                      <div className="font-semibold text-[color:var(--color-text)]">{ticket.run.status}</div>
                     </div>
                   </div>
 
-                  <details className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-                    <summary className="cursor-pointer font-semibold text-indigo-700 hover:text-indigo-800 transition-colors">
+                  <details className="mt-5 rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4">
+                    <summary className="cursor-pointer text-sm font-semibold text-[color:var(--color-primary)]">
                       View full details
                     </summary>
-                    <div className="mt-4 space-y-4 text-sm text-gray-700">
+                    <div className="mt-4 space-y-4 text-sm text-[color:rgba(15,23,42,0.75)]">
                       <div>
-                        <div className="font-semibold text-gray-900 mb-1">Description</div>
+                        <div className="mb-1 font-semibold text-[color:var(--color-text)]">Description</div>
                         <p className="leading-relaxed whitespace-pre-line">{ticket.description}</p>
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900 mb-1">Acceptance Criteria</div>
+                        <div className="mb-1 font-semibold text-[color:var(--color-text)]">Acceptance criteria</div>
                         <p className="leading-relaxed whitespace-pre-line">
                           {ticket.acceptanceCriteria}
                         </p>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <div className="font-semibold text-gray-900 mb-1">Tags</div>
+                          <div className="mb-1 font-semibold text-[color:var(--color-text)]">Tags</div>
                           <p>{tags}</p>
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900 mb-1">Dependencies</div>
+                          <div className="mb-1 font-semibold text-[color:var(--color-text)]">Dependencies</div>
                           <p>{dependencies}</p>
                         </div>
                       </div>

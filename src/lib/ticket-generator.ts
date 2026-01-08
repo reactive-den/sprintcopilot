@@ -239,8 +239,58 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
         }
         
         repaired = result;
+
+        // Step 3: Append missing closing brackets/braces if the JSON is truncated
+        const appendMissingClosers = (input: string) => {
+          const stack: string[] = [];
+          let inString = false;
+          let escapeNext = false;
+          for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            if (escapeNext) {
+              escapeNext = false;
+              continue;
+            }
+            if (char === '\\') {
+              escapeNext = true;
+              continue;
+            }
+            if (char === '"') {
+              // Toggle only when not escaped
+              let backslashCount = 0;
+              for (let j = i - 1; j >= 0 && input[j] === '\\'; j--) {
+                backslashCount++;
+              }
+              if (backslashCount % 2 === 0) {
+                inString = !inString;
+              }
+              continue;
+            }
+            if (inString) continue;
+
+            if (char === '{') stack.push('}');
+            if (char === '[') stack.push(']');
+            if (char === '}' || char === ']') {
+              const expected = stack[stack.length - 1];
+              if (expected === char) {
+                stack.pop();
+              }
+            }
+          }
+
+          let output = input;
+          if (inString) {
+            output += '"';
+          }
+          if (stack.length > 0) {
+            output += stack.reverse().join('');
+          }
+          return output;
+        };
+
+        repaired = appendMissingClosers(repaired);
         
-        // Step 3: Try parsing the repaired version
+        // Step 4: Try parsing the repaired version
         tickets = JSON.parse(repaired) as PipelineTicket[];
         console.log('✅ [TICKET-GENERATOR] Successfully repaired and parsed JSON');
       } catch (repairError) {

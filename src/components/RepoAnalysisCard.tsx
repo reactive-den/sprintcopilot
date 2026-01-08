@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { RepoAnalysis } from '@/types';
+import { ChevronDown, ChevronUp, Compass } from 'lucide-react';
 
 interface RepoAnalysisCardProps {
   repoAnalysis: RepoAnalysis;
@@ -26,29 +27,31 @@ export function RepoAnalysisCard({
   }, [isOpen]);
 
   return (
-    <div className={`bg-white rounded-3xl shadow-xl p-8 border border-indigo-100 ${className}`}>
+    <div className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}>
       <div className="flex items-start justify-between mb-4 gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center">
-              <span className="text-xl">🧭</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+              <Compass className="h-5 w-5 text-[color:var(--color-primary)]" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900">Repo Analysis</h2>
+            <h2 className="text-xl font-semibold text-[color:var(--color-text)]">Repo analysis</h2>
           </div>
           {repoAnalysis.repoUrl && (
-            <p className="text-sm text-gray-500">{repoAnalysis.repoUrl}</p>
+            <p className="text-xs text-[color:rgba(15,23,42,0.6)]">{repoAnalysis.repoUrl}</p>
           )}
         </div>
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-            isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+          className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+            isAvailable
+              ? 'border-[color:rgba(37,99,235,0.3)] text-[color:var(--color-primary)]'
+              : 'border-[color:rgba(185,28,28,0.35)] text-[color:var(--color-danger)]'
           }`}
         >
           {isAvailable ? 'Ready' : 'Unavailable'}
         </span>
       </div>
 
-      <p className="text-gray-700 leading-relaxed">
+      <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
         {repoAnalysis.summary || repoAnalysis.message || 'Repository analysis is unavailable.'}
       </p>
 
@@ -62,10 +65,14 @@ export function RepoAnalysisCard({
             }
             setShowDetails((prev) => !prev);
           }}
-          className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition-all hover:border-indigo-300 hover:bg-indigo-100"
+          className="inline-flex items-center gap-2 rounded-full border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-background)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.24)]"
         >
           <span>{showDetails ? 'Hide details' : 'View details'}</span>
-          <span aria-hidden="true">{showDetails ? '▲' : '▼'}</span>
+          {showDetails ? (
+            <ChevronUp className="h-4 w-4 text-[color:rgba(15,23,42,0.6)]" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-[color:rgba(15,23,42,0.6)]" />
+          )}
         </button>
       </div>
 
@@ -77,13 +84,13 @@ export function RepoAnalysisCard({
           <DetailBlock title="Risks" items={repoAnalysis.risks} />
           <DetailBlock title="Recommendations" items={repoAnalysis.recommendations} />
           <div className="space-y-3">
-            <p className="text-sm font-semibold text-gray-900">Coding Practices</p>
+            <p className="text-sm font-semibold text-[color:var(--color-text)]">Coding practices</p>
             <DetailBlock title="Strengths" items={repoAnalysis.codingPractices?.strengths} />
             <DetailBlock title="Weaknesses" items={repoAnalysis.codingPractices?.weaknesses} />
           </div>
           <div className="space-y-3 md:col-span-2">
-            <p className="text-sm font-semibold text-gray-900">Evidence Snapshot</p>
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
+            <p className="text-sm font-semibold text-[color:var(--color-text)]">Evidence snapshot</p>
+            <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4 text-sm text-[color:rgba(15,23,42,0.75)] space-y-2">
               {repoAnalysis.evidence?.topLevel?.length ? (
                 <p>
                   <span className="font-semibold">Top level:</span> {repoAnalysis.evidence.topLevel.join(', ')}
@@ -112,8 +119,8 @@ function DetailBlock({ title, items }: { title: string; items?: string[] }) {
   const safeItems = items || [];
   return (
     <div className="space-y-3">
-      <p className="text-sm font-semibold text-gray-900">{title}</p>
-      <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+      <p className="text-sm font-semibold text-[color:var(--color-text)]">{title}</p>
+      <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4 text-sm text-[color:rgba(15,23,42,0.75)]">
         {safeItems.length > 0 ? (
           <ul className="list-disc list-inside space-y-1">
             {safeItems.map((item, index) => (
@@ -121,7 +128,7 @@ function DetailBlock({ title, items }: { title: string; items?: string[] }) {
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500">No details captured yet.</p>
+          <p className="text-[color:rgba(15,23,42,0.55)]">No details captured yet.</p>
         )}
       </div>
     </div>

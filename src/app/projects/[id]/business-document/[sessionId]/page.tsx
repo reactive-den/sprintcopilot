@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { BusinessDocument } from '@/lib/business-document';
+import { AlertTriangle, ChevronLeft, FileDown, LayoutList, Loader2 } from 'lucide-react';
 
 export default function BusinessDocumentPage({
   params,
@@ -84,7 +85,7 @@ export default function BusinessDocumentPage({
       };
 
       // Title
-      addText(businessDocument.title, 18, true, [0, 51, 102]);
+      addText(businessDocument.title, 18, true, [37, 99, 235]);
       yPosition += 5;
 
       // Executive Summary
@@ -265,10 +266,12 @@ export default function BusinessDocumentPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading business document...</p>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+          <p className="text-sm font-semibold text-[color:var(--color-text)]">
+            Loading business document...
+          </p>
         </div>
       </div>
     );
@@ -276,56 +279,60 @@ export default function BusinessDocumentPage({
 
   if (error || !businessDocument) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
-          <div className="text-center">
-            <span className="text-4xl mb-4 block">❌</span>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
-            <p className="text-gray-600 mb-6">{error || 'Document not found'}</p>
-            <button
-              onClick={() => router.push(`/projects/${projectId}`)}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold"
-            >
-              Go Back
-            </button>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-2xl border border-[color:rgba(185,28,28,0.3)] bg-[color:var(--color-surface)] p-6 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(185,28,28,0.1)]">
+            <AlertTriangle className="h-5 w-5 text-[color:var(--color-danger)]" />
           </div>
+          <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">Unable to load</h2>
+          <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
+            {error || 'Document not found'}
+          </p>
+          <button
+            onClick={() => router.push(`/projects/${projectId}`)}
+            className="mt-6 h-11 rounded-lg bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            Go back
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[color:var(--color-background)] p-4 md:p-8">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.push(`/projects/${projectId}?showRepoDetails=true`)}
-            className="text-indigo-600 hover:text-indigo-700 font-semibold mb-6 flex items-center gap-2 transition-colors group"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:text-[color:rgba(15,23,42,0.7)]"
           >
-            <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+            <ChevronLeft className="h-4 w-4" />
             <span>Back to Project</span>
           </button>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-semibold text-[color:var(--color-text)]">
                 {businessDocument.title}
               </h1>
-              <p className="text-gray-600">Business Requirements Document</p>
+              <p className="mt-1 text-sm text-[color:rgba(15,23,42,0.6)]">
+                Business requirements document
+              </p>
             </div>
-            <div className="flex gap-3">
-            <button
-              onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
+                className="inline-flex h-11 items-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)]"
               >
-                <span>📋</span>
-                <span>Generate HLDs and LLDs</span>
+                <LayoutList className="h-4 w-4 text-[color:var(--color-primary)]" />
+                <span>HLDs and LLDs</span>
               </button>
               <button
                 onClick={downloadDocument}
-                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
+                className="inline-flex h-11 items-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95"
               >
-                <span>📥</span>
+                <FileDown className="h-4 w-4" />
                 <span>Download PDF</span>
               </button>
             </div>
@@ -333,50 +340,58 @@ export default function BusinessDocumentPage({
         </div>
 
         {/* Document Content */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
+        <div className="space-y-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
           {/* Executive Summary */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+            <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
               Executive Summary
             </h2>
-            <p className="text-gray-700 leading-relaxed">{businessDocument.executiveSummary}</p>
+            <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+              {businessDocument.executiveSummary}
+            </p>
           </section>
 
           {/* Problem Statement */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+            <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
               Problem Statement
             </h2>
-            <p className="text-gray-700 leading-relaxed">{businessDocument.problemStatement}</p>
+            <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+              {businessDocument.problemStatement}
+            </p>
           </section>
 
           {/* Product Overview */}
           {businessDocument.productOverview && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Product Overview
               </h2>
-              <p className="text-gray-700 leading-relaxed">{businessDocument.productOverview}</p>
+              <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+                {businessDocument.productOverview}
+              </p>
             </section>
           )}
 
           {/* System Design */}
           {businessDocument.systemDesign && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 System Design
               </h2>
-              <p className="text-gray-700 leading-relaxed">{businessDocument.systemDesign}</p>
+              <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+                {businessDocument.systemDesign}
+              </p>
             </section>
           )}
 
           {/* Objectives */}
           {businessDocument.objectives.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Objectives
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.objectives.map((obj, i) => (
                   <li key={i} className="leading-relaxed">
                     {obj}
@@ -388,19 +403,21 @@ export default function BusinessDocumentPage({
 
           {/* Scope */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+            <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
               Scope
             </h2>
-            <p className="text-gray-700 leading-relaxed">{businessDocument.scope}</p>
+            <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+              {businessDocument.scope}
+            </p>
           </section>
 
           {/* Stakeholders */}
           {businessDocument.stakeholders.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Stakeholders
               </h2>
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
+              <ul className="list-disc list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.stakeholders.map((stakeholder, i) => (
                   <li key={i}>{stakeholder}</li>
                 ))}
@@ -410,13 +427,15 @@ export default function BusinessDocumentPage({
 
           {/* Requirements */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+            <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
               Requirements
             </h2>
             {businessDocument.requirements.functional.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Functional Requirements</h3>
-                <ul className="list-decimal list-inside space-y-2 text-gray-700">
+                <h3 className="mb-3 text-sm font-semibold text-[color:var(--color-text)]">
+                  Functional requirements
+                </h3>
+                <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                   {businessDocument.requirements.functional.map((req, i) => (
                     <li key={i} className="leading-relaxed">
                       {req}
@@ -427,8 +446,10 @@ export default function BusinessDocumentPage({
             )}
             {businessDocument.requirements.nonFunctional.length > 0 && (
               <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Non-Functional Requirements</h3>
-                <ul className="list-decimal list-inside space-y-2 text-gray-700">
+                <h3 className="mb-3 text-sm font-semibold text-[color:var(--color-text)]">
+                  Non-functional requirements
+                </h3>
+                <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                   {businessDocument.requirements.nonFunctional.map((req, i) => (
                     <li key={i} className="leading-relaxed">
                       {req}
@@ -442,10 +463,10 @@ export default function BusinessDocumentPage({
           {/* Data Flows */}
           {businessDocument.dataFlows && businessDocument.dataFlows.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Data Flows
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.dataFlows.map((flow, i) => (
                   <li key={i} className="leading-relaxed">
                     {flow}
@@ -458,10 +479,10 @@ export default function BusinessDocumentPage({
           {/* Cost Cutting Concerns */}
           {businessDocument.costCuttingConcerns && businessDocument.costCuttingConcerns.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Cost Cutting Concerns
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.costCuttingConcerns.map((concern, i) => (
                   <li key={i} className="leading-relaxed">
                     {concern}
@@ -474,20 +495,22 @@ export default function BusinessDocumentPage({
           {/* Deployment */}
           {businessDocument.deployment && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Deployment
               </h2>
-              <p className="text-gray-700 leading-relaxed">{businessDocument.deployment}</p>
+              <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+                {businessDocument.deployment}
+              </p>
             </section>
           )}
 
           {/* Backlog */}
           {businessDocument.backlog && businessDocument.backlog.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Backlog
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.backlog.map((item, i) => (
                   <li key={i} className="leading-relaxed">
                     {item}
@@ -500,10 +523,10 @@ export default function BusinessDocumentPage({
           {/* Questions */}
           {businessDocument.questions && businessDocument.questions.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Questions
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.questions.map((question, i) => (
                   <li key={i} className="leading-relaxed">
                     {question}
@@ -516,10 +539,10 @@ export default function BusinessDocumentPage({
           {/* Assumptions */}
           {businessDocument.assumptions.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Assumptions
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.assumptions.map((ass, i) => (
                   <li key={i} className="leading-relaxed">
                     {ass}
@@ -532,10 +555,10 @@ export default function BusinessDocumentPage({
           {/* Constraints */}
           {businessDocument.constraints.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Constraints
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.constraints.map((constraint, i) => (
                   <li key={i} className="leading-relaxed">
                     {constraint}
@@ -548,10 +571,10 @@ export default function BusinessDocumentPage({
           {/* Success Criteria */}
           {businessDocument.successCriteria.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Success Criteria
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.successCriteria.map((criteria, i) => (
                   <li key={i} className="leading-relaxed">
                     {criteria}
@@ -564,10 +587,10 @@ export default function BusinessDocumentPage({
           {/* Risks */}
           {businessDocument.risks.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Risks
               </h2>
-              <ul className="list-decimal list-inside space-y-2 text-gray-700">
+              <ul className="list-decimal list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.risks.map((risk, i) => (
                   <li key={i} className="leading-relaxed">
                     {risk}
@@ -580,20 +603,22 @@ export default function BusinessDocumentPage({
           {/* Timeline */}
           {businessDocument.timeline && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Timeline
               </h2>
-              <p className="text-gray-700 leading-relaxed">{businessDocument.timeline}</p>
+              <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.75)]">
+                {businessDocument.timeline}
+              </p>
             </section>
           )}
 
           {/* Dependencies */}
           {businessDocument.dependencies && businessDocument.dependencies.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-indigo-500 pb-2">
+              <h2 className="mb-4 border-b border-[color:rgba(15,23,42,0.16)] pb-2 text-lg font-semibold text-[color:var(--color-text)]">
                 Dependencies
               </h2>
-              <ul className="list-disc list-inside space-y-2 text-gray-700">
+              <ul className="list-disc list-inside space-y-2 text-sm text-[color:rgba(15,23,42,0.75)]">
                 {businessDocument.dependencies.map((dep, i) => (
                   <li key={i}>{dep}</li>
                 ))}

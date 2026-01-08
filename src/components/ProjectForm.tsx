@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
+import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 
 const projectSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters'),
@@ -63,102 +64,105 @@ export function ProjectForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <label htmlFor="title" className="block text-sm font-semibold text-gray-700">
+        <label htmlFor="title" className="block text-sm font-semibold text-[color:var(--color-text)]">
           Feature Title *
         </label>
         <input
           id="title"
           type="text"
           {...register('title')}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder:text-gray-500 text-gray-900"
+          className="w-full h-11 px-4 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-text)] transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] placeholder:text-[color:rgba(15,23,42,0.5)]"
           placeholder="e.g., User Authentication System"
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <span>⚠️</span> {errors.title.message}
+          <p className="mt-1 flex items-center gap-2 text-xs text-[color:var(--color-danger)]">
+            <AlertCircle className="h-4 w-4" />
+            {errors.title.message}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="problem" className="block text-sm font-semibold text-gray-700">
+        <label htmlFor="problem" className="block text-sm font-semibold text-[color:var(--color-text)]">
           Problem Statement *
         </label>
         <textarea
           id="problem"
           {...register('problem')}
           rows={6}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none placeholder:text-gray-500 text-gray-900"
+          className="w-full min-h-[132px] px-4 py-3 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-text)] transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] resize-none placeholder:text-[color:rgba(15,23,42,0.5)]"
           placeholder="Describe the problem you're trying to solve and the desired outcome..."
         />
         {errors.problem && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <span>⚠️</span> {errors.problem.message}
+          <p className="mt-1 flex items-center gap-2 text-xs text-[color:var(--color-danger)]">
+            <AlertCircle className="h-4 w-4" />
+            {errors.problem.message}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="constraints" className="block text-sm font-semibold text-gray-700">
-          Constraints <span className="text-gray-400 font-normal">(Optional)</span>
+        <label htmlFor="constraints" className="block text-sm font-semibold text-[color:var(--color-text)]">
+          Constraints <span className="font-normal text-[color:rgba(15,23,42,0.55)]">(Optional)</span>
         </label>
         <textarea
           id="constraints"
           {...register('constraints')}
           rows={4}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-gray-50 focus:bg-white resize-none placeholder:text-gray-500 text-gray-900"
+          className="w-full min-h-[110px] px-4 py-3 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-text)] transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] resize-none placeholder:text-[color:rgba(15,23,42,0.5)]"
           placeholder="Any technical constraints, deadlines, or requirements..."
         />
         {errors.constraints && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <span>⚠️</span> {errors.constraints.message}
+          <p className="mt-1 flex items-center gap-2 text-xs text-[color:var(--color-danger)]">
+            <AlertCircle className="h-4 w-4" />
+            {errors.constraints.message}
           </p>
         )}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="repoUrl" className="block text-sm font-semibold text-gray-700">
-          Repository URL <span className="text-gray-400 font-normal">(Optional)</span>
+        <label htmlFor="repoUrl" className="block text-sm font-semibold text-[color:var(--color-text)]">
+          Repository URL <span className="font-normal text-[color:rgba(15,23,42,0.55)]">(Optional)</span>
         </label>
         <input
           id="repoUrl"
           type="url"
           {...register('repoUrl')}
-          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-gray-50 focus:bg-white placeholder:text-gray-500 text-gray-900"
+          className="w-full h-11 px-4 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-text)] transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] placeholder:text-[color:rgba(15,23,42,0.5)]"
           placeholder="https://github.com/owner/repo"
         />
         {errors.repoUrl && (
-          <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
-            <span>⚠️</span> {errors.repoUrl.message}
+          <p className="mt-1 flex items-center gap-2 text-xs text-[color:var(--color-danger)]">
+            <AlertCircle className="h-4 w-4" />
+            {errors.repoUrl.message}
           </p>
         )}
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-xs text-[color:rgba(15,23,42,0.6)]">
           Optional: Provide a GitHub repository URL for additional context when generating tickets.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
-          <span className="text-xl">❌</span>
-          <p className="text-sm text-red-600 flex-1">{error}</p>
+        <div className="flex items-start gap-3 rounded-lg border border-[color:rgba(185,28,28,0.3)] bg-[color:rgba(185,28,28,0.08)] p-4">
+          <AlertCircle className="mt-0.5 h-4 w-4 text-[color:var(--color-danger)]" />
+          <p className="text-sm text-[color:var(--color-danger)]">{error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={createProject.isPending}
-        className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-6 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {createProject.isPending ? (
           <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            <span>Creating Magic...</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Creating project...</span>
           </>
         ) : (
           <>
-            <span>✨</span>
-            <span>Generate Sprint Plan</span>
-            <span>→</span>
+            <span>Generate sprint plan</span>
+            <ArrowRight className="h-4 w-4" />
           </>
         )}
       </button>

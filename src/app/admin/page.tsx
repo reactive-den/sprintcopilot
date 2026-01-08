@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  ChevronLeft,
+  Folder,
+  FolderOpen,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Send,
+  Ticket,
+  UploadCloud,
+} from 'lucide-react';
 
 interface ClickUpTask {
   id: string;
@@ -154,8 +165,8 @@ export default function AdminPage() {
 
           if (estimateResponse.ok) {
             const data = await estimateResponse.json();
-            alert(`✅ Successfully estimated and assigned ${data.totalTickets} tickets!\n\n` +
-              `📊 Summary:\n` +
+            alert(`Successfully estimated and assigned ${data.totalTickets} tickets.\n\n` +
+              `Summary:\n` +
               `- FE tickets: ${data.feTickets}\n` +
               `- BE tickets: ${data.beTickets}\n` +
               `- Fullstack tickets: ${data.fullstackTickets}`);
@@ -279,53 +290,50 @@ export default function AdminPage() {
 
   if (isLoading && projects.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-          </div>
-          <p className="text-xl font-semibold text-gray-700">Loading admin panel...</p>
+      <div className="min-h-screen bg-[color:var(--color-background)] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+          <p className="text-sm font-semibold text-[color:var(--color-text)]">Loading admin panel...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-[color:var(--color-background)]">
       <div className="container mx-auto px-4 py-8">
         {/* Header Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-          <div className="flex items-start justify-between mb-6">
+        <div className="mb-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
-                  <span className="text-2xl">⚡</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+                  <UploadCloud className="h-5 w-5 text-[color:var(--color-primary)]" />
                 </div>
-                <h1 className="text-4xl font-black text-gray-900">ClickUp Admin</h1>
+                <h1 className="text-2xl font-semibold text-[color:var(--color-text)]">ClickUp admin</h1>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">
+              <p className="text-sm leading-relaxed text-[color:rgba(15,23,42,0.7)]">
                 View and manage your ClickUp folders, sprints, and tickets
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={() => router.push('/')}
-                className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95"
               >
-                <span>➕</span>
-                <span>Add Project</span>
+                <Plus className="h-4 w-4" />
+                <span>Add project</span>
               </button>
             </div>
           </div>
 
           {/* Project Selector */}
           <div className="flex items-center gap-4">
-            <label className="text-gray-700 font-semibold">Select Project:</label>
+            <label className="text-sm font-semibold text-[color:var(--color-text)]">Select project:</label>
             <select
               value={selectedProjectId}
               onChange={handleProjectChange}
-              className="flex-1 max-w-md px-4 py-3 bg-gray-50 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all font-medium"
+              className="flex-1 max-w-md h-11 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)]"
             >
               <option value="">-- Select a project --</option>
               {projects.map((project) => (
@@ -339,35 +347,35 @@ export default function AdminPage() {
 
         {/* Add Sprint Modal */}
         {showAddSprintModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Add New Sprint</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color:rgba(15,23,42,0.4)] p-4">
+            <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-[color:var(--color-text)]">Add new sprint</h2>
                 <button
                   onClick={() => {
                     setShowAddSprintModal(false);
                     setFeatureDescription('');
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-sm font-semibold text-[color:rgba(15,23,42,0.6)] transition hover:text-[color:rgba(15,23,42,0.85)]"
                 >
-                  <span className="text-2xl">×</span>
+                  Close
                 </button>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="mb-2 block text-sm font-semibold text-[color:var(--color-text)]">
                     Feature Description *
                   </label>
                   <textarea
                     value={featureDescription}
                     onChange={(e) => setFeatureDescription(e.target.value)}
                     placeholder="Describe the feature or functionality you want to implement in this sprint..."
-                    className="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none"
+                    className="w-full rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] resize-none"
                     rows={8}
                     disabled={isAddingSprint}
                   />
-                  <p className="mt-2 text-sm text-gray-500">
+                  <p className="mt-2 text-xs text-[color:rgba(15,23,42,0.6)]">
                     This feature will be used along with your project's HDD, LLDs, and business document context to generate tickets.
                   </p>
                 </div>
@@ -377,17 +385,17 @@ export default function AdminPage() {
                 <button
                   onClick={handleCreateSprintWithTickets}
                   disabled={isAddingSprint || !featureDescription.trim()}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isAddingSprint ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Creating Sprint & Tickets...</span>
                     </>
                   ) : (
                     <>
-                      <span>➕</span>
-                      <span>Create Sprint</span>
+                      <Plus className="h-4 w-4" />
+                      <span>Create sprint</span>
                     </>
                   )}
                 </button>
@@ -397,7 +405,7 @@ export default function AdminPage() {
                     setFeatureDescription('');
                   }}
                   disabled={isAddingSprint}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all"
+                  className="h-11 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Cancel
                 </button>
@@ -411,28 +419,28 @@ export default function AdminPage() {
             {/* Back Button */}
             <button
               onClick={() => router.push(`/projects/${selectedProjectId}`)}
-              className="text-indigo-600 hover:text-indigo-700 font-semibold mb-6 flex items-center gap-2 transition-colors group"
+              className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)] transition hover:text-[color:rgba(15,23,42,0.7)]"
             >
-              <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
+              <ChevronLeft className="h-4 w-4" />
               <span>Back to Project</span>
             </button>
 
             {/* Admin Progress Chat */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                  <span>💬</span>
-                  <span>Admin Progress Chat</span>
+            <div className="mb-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-[color:var(--color-text)]">
+                  <MessageSquare className="h-4 w-4 text-[color:var(--color-primary)]" />
+                  <span>Admin progress chat</span>
                 </h2>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs text-[color:rgba(15,23,42,0.6)]">
                   Ask about project, sprint, or assignee progress
                 </span>
               </div>
 
-              <div className="border border-indigo-100 rounded-2xl p-4 bg-gradient-to-br from-indigo-50/40 to-purple-50/40">
-                <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
+              <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4">
+                <div className="max-h-72 space-y-3 overflow-y-auto pr-2">
                   {chatMessages.length === 0 ? (
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-sm text-[color:rgba(15,23,42,0.6)]">
                       Ask a question like "How is the current sprint going?"
                     </p>
                   ) : (
@@ -442,10 +450,10 @@ export default function AdminPage() {
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm leading-relaxed ${
+                          className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                             message.role === 'user'
-                              ? 'bg-indigo-600 text-white'
-                              : 'bg-white text-gray-800 border border-indigo-100'
+                              ? 'bg-[color:var(--color-primary)] text-white'
+                              : 'border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] text-[color:var(--color-text)]'
                           } whitespace-pre-wrap`}
                         >
                           {message.content}
@@ -455,7 +463,7 @@ export default function AdminPage() {
                   )}
                   {isChatLoading && (
                     <div className="flex justify-start">
-                      <div className="px-4 py-3 rounded-2xl bg-white text-gray-500 border border-indigo-100 text-sm">
+                      <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] px-4 py-3 text-sm text-[color:rgba(15,23,42,0.6)]">
                         Thinking...
                       </div>
                     </div>
@@ -464,7 +472,7 @@ export default function AdminPage() {
               </div>
 
               {chatError && (
-                <p className="mt-3 text-sm text-red-600">{chatError}</p>
+                <p className="mt-3 text-sm text-[color:var(--color-danger)]">{chatError}</p>
               )}
 
               <form onSubmit={handleChatSend} className="mt-4 flex gap-3">
@@ -472,41 +480,42 @@ export default function AdminPage() {
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Ask about progress, blockers, or assignees..."
-                  className="flex-1 px-4 py-3 bg-gray-50 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm"
+                  className="flex-1 h-11 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm text-[color:var(--color-text)] focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)]"
                   disabled={isChatLoading}
                 />
                 <button
                   type="submit"
                   disabled={isChatLoading || !chatInput.trim()}
-                  className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="inline-flex h-11 items-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
+                  <Send className="h-4 w-4" />
                   Send
                 </button>
               </form>
             </div>
 
             {/* Folders Section */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                  <span>📁</span>
-                  <span>Project Folders ({folders.length})</span>
+            <div className="mb-8 rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-[color:var(--color-text)]">
+                  <Folder className="h-4 w-4 text-[color:var(--color-primary)]" />
+                  <span>Project folders ({folders.length})</span>
                 </h2>
                 {selectedProjectId && (
                   <button
                     onClick={handleAddSprint}
                     disabled={isAddingSprint || !selectedProjectId}
-                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="inline-flex h-11 items-center gap-2 rounded-lg bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isAddingSprint ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <Loader2 className="h-4 w-4 animate-spin" />
                         <span>Adding Sprint...</span>
                       </>
                     ) : (
                       <>
-                        <span>➕</span>
-                        <span>Add Sprint</span>
+                        <Plus className="h-4 w-4" />
+                        <span>Add sprint</span>
                       </>
                     )}
                   </button>
@@ -515,46 +524,47 @@ export default function AdminPage() {
 
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <div className="relative w-16 h-16 mb-4">
-                    <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-                  </div>
-                  <p className="text-gray-600 font-medium">Loading folders from ClickUp...</p>
+                  <Loader2 className="h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+                  <p className="mt-3 text-sm text-[color:rgba(15,23,42,0.6)]">Loading folders from ClickUp...</p>
                 </div>
               ) : folders.length > 0 ? (
                 <div className="space-y-4">
                   {folders.map((folder) => (
-                    <div key={folder.id} className="border border-indigo-200 rounded-xl overflow-hidden">
+                    <div key={folder.id} className="overflow-hidden rounded-xl border border-[color:rgba(15,23,42,0.12)]">
                       {/* Folder Header */}
                       <button
                         onClick={() => toggleFolder(folder.id)}
-                        className="w-full px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 flex items-center justify-between transition-colors"
+                        className="flex w-full items-center justify-between bg-[color:var(--color-background)] px-4 py-3 text-left text-sm transition hover:bg-[color:rgba(37,99,235,0.08)]"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{expandedFolders.has(folder.id) ? '📂' : '📁'}</span>
-                          <span className="font-semibold text-gray-900">{folder.name}</span>
+                          {expandedFolders.has(folder.id) ? (
+                            <FolderOpen className="h-4 w-4 text-[color:var(--color-primary)]" />
+                          ) : (
+                            <Folder className="h-4 w-4 text-[color:var(--color-primary)]" />
+                          )}
+                          <span className="font-semibold text-[color:var(--color-text)]">{folder.name}</span>
                         </div>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs text-[color:rgba(15,23,42,0.6)]">
                           {folder.lists?.length || 0} sprint{folder.lists?.length !== 1 ? 's' : ''}
                         </span>
                       </button>
 
                       {/* Sprint Lists */}
                       {expandedFolders.has(folder.id) && folder.lists && folder.lists.length > 0 && (
-                        <div className="p-4 bg-white">
+                        <div className="bg-[color:var(--color-surface)] p-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {folder.lists.map((list) => (
                               <div
                                 key={list.id}
-                                className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200"
+                                className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4"
                               >
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="font-semibold text-gray-900">{list.name}</span>
-                                  <span className="text-sm bg-blue-200 text-blue-800 px-2 py-1 rounded-full">
+                                  <span className="text-sm font-semibold text-[color:var(--color-text)]">{list.name}</span>
+                                  <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-2 py-1 text-xs text-[color:rgba(15,23,42,0.7)]">
                                     {list.task_count || 0} tasks
                                   </span>
                                 </div>
-                                <p className="text-xs text-gray-500">ID: {list.id}</p>
+                                <p className="text-xs text-[color:rgba(15,23,42,0.55)]">ID: {list.id}</p>
                               </div>
                             ))}
                           </div>
@@ -564,30 +574,31 @@ export default function AdminPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">No folders found. Create tickets to generate folders.</p>
+                <p className="text-sm text-[color:rgba(15,23,42,0.6)]">
+                  No folders found. Create tickets to generate folders.
+                </p>
               )}
             </div>
 
             {/* Tasks Section */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-indigo-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                  <span>🎫</span>
-                  <span>All Tasks ({tasks.length})</span>
+            <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-[color:var(--color-text)]">
+                  <Ticket className="h-4 w-4 text-[color:var(--color-primary)]" />
+                  <span>All tasks ({tasks.length})</span>
                 </h2>
                 <button
                   onClick={handleEstimate}
                   disabled={isEstimating || !selectedProjectId}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="inline-flex h-11 items-center gap-2 rounded-lg border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-surface)] px-4 text-sm font-semibold text-[color:var(--color-text)] transition hover:border-[color:rgba(15,23,42,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isEstimating ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <Loader2 className="h-4 w-4 animate-spin text-[color:var(--color-primary)]" />
                       <span>Estimating...</span>
                     </>
                   ) : (
                     <>
-                      <span>📊</span>
                       <span>Estimate</span>
                     </>
                   )}
@@ -595,40 +606,33 @@ export default function AdminPage() {
               </div>
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <div className="relative w-16 h-16 mb-4">
-                    <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-                  </div>
-                  <p className="text-gray-600 font-medium">Loading tasks from ClickUp...</p>
+                  <Loader2 className="h-8 w-8 animate-spin text-[color:var(--color-primary)]" />
+                  <p className="mt-3 text-sm text-[color:rgba(15,23,42,0.6)]">Loading tasks from ClickUp...</p>
                 </div>
               ) : tasks.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Sprint</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Task</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Priority</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Estimate</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Assignee</th>
+                      <tr className="border-b border-[color:rgba(15,23,42,0.12)]">
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Sprint</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Status</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Task</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Priority</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Estimate</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-[color:rgba(15,23,42,0.6)]">Assignee</th>
                       </tr>
                     </thead>
                     <tbody>
                       {tasks.map((task) => (
-                        <tr key={task.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <tr key={task.id} className="border-b border-[color:rgba(15,23,42,0.08)] hover:bg-[color:rgba(37,99,235,0.04)]">
                           <td className="py-3 px-4">
-                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                            <span className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]">
                               {task.sprintList || 'Unknown'}
                             </span>
                           </td>
                           <td className="py-3 px-4">
                             <span
-                              className="px-3 py-1 rounded-full text-sm font-medium"
-                              style={{
-                                backgroundColor: task.status?.color || '#e5e7eb',
-                                color: '#1f2937',
-                              }}
+                              className="rounded-full border border-[color:rgba(15,23,42,0.16)] px-3 py-1 text-xs text-[color:rgba(15,23,42,0.7)]"
                             >
                               {task.status?.status || 'Unknown'}
                             </span>
@@ -639,37 +643,45 @@ export default function AdminPage() {
                                 href={task.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+                                className="text-sm font-medium text-[color:var(--color-primary)] hover:underline"
                               >
                                 {task.name}
                               </a>
                             ) : (
-                              <span className="font-medium text-gray-900">{task.name}</span>
+                              <span className="text-sm font-medium text-[color:var(--color-text)]">{task.name}</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
-                            {task.priority ? (
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                task.priority === 1 ? 'bg-red-100 text-red-700' :
-                                task.priority === 2 ? 'bg-orange-100 text-orange-700' :
-                                task.priority === 3 ? 'bg-blue-100 text-blue-700' :
-                                'bg-gray-100 text-gray-700'
-                              }`}>
-                                {task.priority === 1 ? 'Urgent' :
-                                 task.priority === 2 ? 'High' :
-                                 task.priority === 3 ? 'Normal' : 'Low'}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400">None</span>
-                            )}
+                            {(() => {
+                              if (!task.priority) {
+                                return (
+                                  <span className="text-xs text-[color:rgba(15,23,42,0.5)]">None</span>
+                                );
+                              }
+                              if (typeof task.priority === 'number') {
+                                return (
+                                  <span className="rounded-full border border-[color:rgba(37,99,235,0.3)] bg-[color:rgba(37,99,235,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--color-primary)]">
+                                    P{task.priority}
+                                  </span>
+                                );
+                              }
+                              const label = String(task.priority.priority || task.priority)
+                                .trim()
+                                .replace(/^./, (char) => char.toUpperCase());
+                              return (
+                                <span className="rounded-full border border-[color:rgba(37,99,235,0.3)] bg-[color:rgba(37,99,235,0.08)] px-3 py-1 text-xs font-semibold text-[color:var(--color-primary)]">
+                                  {label}
+                                </span>
+                              );
+                            })()}
                           </td>
                           <td className="py-3 px-4">
                             {task.time_estimate ? (
-                              <span className="text-gray-700">
+                              <span className="text-sm text-[color:rgba(15,23,42,0.7)]">
                                 {Math.round(task.time_estimate / 3600000)}h
                               </span>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-xs text-[color:rgba(15,23,42,0.5)]">-</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
@@ -679,14 +691,14 @@ export default function AdminPage() {
                               if (assignee) {
                                 return (
                                   <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[color:rgba(15,23,42,0.12)] text-xs font-semibold text-[color:var(--color-text)]">
                                       {assignee.username?.charAt(0).toUpperCase() || '?'}
                                     </div>
-                                    <span className="text-gray-700">{assignee.username || 'Unknown'}</span>
+                                    <span className="text-sm text-[color:rgba(15,23,42,0.7)]">{assignee.username || 'Unknown'}</span>
                                   </div>
                                 );
                               }
-                              return <span className="text-gray-400">Unassigned</span>;
+                              return <span className="text-xs text-[color:rgba(15,23,42,0.5)]">Unassigned</span>;
                             })()}
                           </td>
                         </tr>
@@ -696,14 +708,16 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📭</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No Tasks Yet</h3>
-                  <p className="text-gray-500 mb-6">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+                    <Ticket className="h-5 w-5 text-[color:var(--color-primary)]" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">No tasks yet</h3>
+                  <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
                     Create tickets for this project to see them here
                   </p>
                   <button
                     onClick={() => router.push(`/projects/${selectedProjectId}`)}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold"
+                    className="mt-6 h-11 rounded-lg bg-[color:var(--color-primary)] px-5 text-sm font-semibold text-white transition hover:brightness-95"
                   >
                     Go to Project
                   </button>
@@ -712,10 +726,12 @@ export default function AdminPage() {
             </div>
           </>
         ) : (
-          <div className="bg-white rounded-3xl shadow-xl p-12 border border-indigo-100 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Project Selected</h2>
-            <p className="text-gray-500 mb-6">
+          <div className="rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+              <Folder className="h-5 w-5 text-[color:var(--color-primary)]" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold text-[color:var(--color-text)]">No project selected</h2>
+            <p className="mt-2 text-sm text-[color:rgba(15,23,42,0.6)]">
               Select a project from the dropdown above to view its ClickUp data
             </p>
           </div>

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Bot, Loader2, MessageSquare, Send, User } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -159,44 +160,41 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[700px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div className="flex flex-col h-full max-h-[700px] rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 text-white">
+      <div className="border-b border-[color:rgba(15,23,42,0.12)] px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <span className="text-xl">💬</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+              <MessageSquare className="h-5 w-5 text-[color:var(--color-primary)]" />
             </div>
             <div>
-              <h2 className="font-bold text-lg">Feature Clarification</h2>
-              <p className="text-sm text-white/90">
+              <h2 className="text-base font-semibold text-[color:var(--color-text)]">Feature clarification</h2>
+              <p className="text-sm text-[color:rgba(15,23,42,0.6)]">
                 Let&apos;s understand your requirements together
               </p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-semibold">
+            <div className="text-sm font-semibold text-[color:var(--color-text)]">
               Questions: {questionCount}/{maxQuestions}
             </div>
             {isQuestionLimitReached && (
-              <div className="text-xs text-white/80 mt-1">Limit reached</div>
+              <div className="mt-1 text-xs text-[color:rgba(15,23,42,0.6)]">Limit reached</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[color:var(--color-background)]">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-12">
             <div className="relative mb-6">
-              <div className="w-20 h-20 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl">✨</span>
-              </div>
+              <div className="w-16 h-16 border-2 border-[color:rgba(15,23,42,0.16)] border-t-[color:var(--color-primary)] rounded-full animate-spin"></div>
             </div>
-            <p className="text-gray-500 text-lg font-medium">Starting conversation...</p>
-            <p className="text-gray-400 text-sm mt-2">Preparing your first question</p>
+            <p className="text-sm font-medium text-[color:rgba(15,23,42,0.7)]">Starting conversation...</p>
+            <p className="mt-2 text-xs text-[color:rgba(15,23,42,0.5)]">Preparing your first question</p>
           </div>
         ) : (
           <>
@@ -209,23 +207,25 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {message.role === 'assistant' && (
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <span className="text-white text-lg">🤖</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+                    <Bot className="h-4 w-4 text-[color:var(--color-primary)]" />
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-2xl px-5 py-4 shadow-md ${
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-br-md'
-                      : 'bg-white text-gray-800 border border-gray-100 rounded-bl-md shadow-sm'
+                      ? 'bg-[color:var(--color-primary)] text-white rounded-br-md'
+                      : 'bg-[color:var(--color-surface)] text-[color:var(--color-text)] border border-[color:rgba(15,23,42,0.12)] rounded-bl-md'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap leading-relaxed text-[15px]">
+                  <p className="whitespace-pre-wrap leading-relaxed text-sm">
                     {message.content}
                   </p>
                   <div
                     className={`text-xs mt-2 ${
-                      message.role === 'user' ? 'text-white/70' : 'text-gray-400'
+                      message.role === 'user'
+                        ? 'text-white/70'
+                        : 'text-[color:rgba(15,23,42,0.5)]'
                     }`}
                   >
                     {new Date(message.createdAt).toLocaleTimeString([], {
@@ -235,29 +235,29 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
                   </div>
                 </div>
                 {message.role === 'user' && (
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                    <span className="text-white text-lg font-bold">You</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:rgba(15,23,42,0.12)]">
+                    <User className="h-4 w-4 text-[color:rgba(15,23,42,0.7)]" />
                   </div>
                 )}
               </div>
             ))}
             {showTyping && (
-              <div className="flex gap-3 justify-start animate-in fade-in">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                  <span className="text-white text-lg">🤖</span>
+              <div className="flex gap-3 justify-start animate-fade-in">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[color:rgba(37,99,235,0.12)]">
+                  <Bot className="h-4 w-4 text-[color:var(--color-primary)]" />
                 </div>
-                <div className="bg-white rounded-2xl rounded-bl-md px-5 py-4 shadow-sm border border-gray-100">
+                <div className="rounded-2xl rounded-bl-md border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] px-5 py-4 shadow-sm">
                   <div className="flex gap-1.5">
                     <div
-                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-[color:rgba(37,99,235,0.6)] rounded-full animate-bounce"
                       style={{ animationDelay: '0ms' }}
                     ></div>
                     <div
-                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-[color:rgba(37,99,235,0.6)] rounded-full animate-bounce"
                       style={{ animationDelay: '150ms' }}
                     ></div>
                     <div
-                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      className="w-2 h-2 bg-[color:rgba(37,99,235,0.6)] rounded-full animate-bounce"
                       style={{ animationDelay: '300ms' }}
                     ></div>
                   </div>
@@ -270,7 +270,7 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white p-5">
+      <div className="border-t border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-5">
         <div className="flex gap-3 items-center">
           <div className="flex-1 relative">
             <textarea
@@ -288,43 +288,45 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
                   ? 'Question limit reached. Please finalize to proceed.'
                   : 'Type your answer here...'
               }
-              className="w-full px-5 py-4 pr-12 border-2 border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all bg-gray-50 focus:bg-white text-gray-900 placeholder:text-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="w-full rounded-xl border border-[color:rgba(15,23,42,0.16)] bg-[color:var(--color-background)] px-4 py-3 pr-12 text-sm text-[color:var(--color-text)] transition focus:border-[color:var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color:rgba(37,99,235,0.2)] placeholder:text-[color:rgba(15,23,42,0.5)] disabled:cursor-not-allowed"
               rows={2}
               disabled={isLoading || isFinalizing || isQuestionLimitReached}
             />
-            <div className="absolute right-3 bottom-3 text-xs text-gray-400">
+            <div className="absolute right-3 bottom-3 text-xs text-[color:rgba(15,23,42,0.5)]">
               {input.length > 0 && (
-                <span className="text-gray-400">Enter to send • Shift+Enter for new line</span>
+                <span className="text-[color:rgba(15,23,42,0.5)]">
+                  Enter to send • Shift+Enter for new line
+                </span>
               )}
             </div>
           </div>
           <button
             onClick={sendMessage}
             disabled={isLoading || isFinalizing || !input.trim() || isQuestionLimitReached}
-            className="px-6 h-[56px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:transform-none flex items-center justify-center min-w-[100px]"
+            className="inline-flex h-11 min-w-[96px] items-center justify-center gap-2 rounded-xl bg-[color:var(--color-primary)] px-4 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
                 <span>Send</span>
-                <span className="ml-2">→</span>
+                <Send className="h-4 w-4" />
               </>
             )}
           </button>
         </div>
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-xs text-gray-400 flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs text-[color:rgba(15,23,42,0.6)]">
             {isQuestionLimitReached ? (
               <>
-                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                <span className="h-2 w-2 rounded-full bg-[color:rgba(15,23,42,0.4)]"></span>
                 <span>
                   Question limit reached ({questionCount}/{maxQuestions})
                 </span>
               </>
             ) : (
               <>
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="h-2 w-2 rounded-full bg-[color:var(--color-primary)]"></span>
                 <span>AI is ready to help</span>
               </>
             )}

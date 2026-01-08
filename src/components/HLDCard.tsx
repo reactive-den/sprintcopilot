@@ -1,6 +1,7 @@
 'use client';
 
 import type { HLD } from '@/types';
+import { AlertTriangle, Gauge, GitBranch, Layers } from 'lucide-react';
 
 interface HLDCardProps {
   hld: HLD;
@@ -11,15 +12,15 @@ interface HLDCardProps {
 export function HLDCard({ hld, isLoading = false, className = '' }: HLDCardProps) {
   if (isLoading) {
     return (
-      <div className={`bg-white rounded-3xl shadow-xl p-8 border border-purple-100 ${className}`}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl animate-pulse"></div>
-          <div className="h-8 bg-gray-200 rounded-lg w-56 animate-pulse"></div>
+      <div className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-[color:rgba(37,99,235,0.12)]"></div>
+          <div className="h-5 w-48 rounded bg-[color:rgba(15,23,42,0.08)]"></div>
         </div>
-        <div className="space-y-4">
-          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5"></div>
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+        <div className="space-y-3">
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)]"></div>
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)] w-4/5"></div>
+          <div className="h-3 rounded bg-[color:rgba(15,23,42,0.08)] w-3/4"></div>
         </div>
       </div>
     );
@@ -37,29 +38,29 @@ export function HLDCard({ hld, isLoading = false, className = '' }: HLDCardProps
 
   return (
     <div
-      className={`bg-white rounded-3xl shadow-xl p-8 border border-purple-100 hover:shadow-2xl transition-shadow duration-300 ${className}`}
+      className={`rounded-2xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-surface)] p-6 shadow-sm ${className}`}
     >
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-          <span className="text-2xl">🏗️</span>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color:rgba(37,99,235,0.12)]">
+          <Layers className="h-5 w-5 text-[color:var(--color-primary)]" />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900">High-Level Design</h2>
+        <h2 className="text-xl font-semibold text-[color:var(--color-text)]">High-level design</h2>
       </div>
 
       {/* System Modules Section */}
       {hasModules && (
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>📦</span>
-            <span>System Modules</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <Layers className="h-4 w-4 text-[color:var(--color-primary)]" />
+            <span>System modules</span>
           </h3>
           <div className="grid gap-3 md:grid-cols-2">
             {hld.modules!.map((module: string, index: number) => (
               <div
                 key={index}
-                className="p-4 bg-purple-50 rounded-xl border border-purple-100 hover:border-purple-300 transition-colors"
+                className="rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4 text-sm text-[color:rgba(15,23,42,0.75)]"
               >
-                <p className="text-gray-700 leading-relaxed">{module}</p>
+                {module}
               </div>
             ))}
           </div>
@@ -69,16 +70,16 @@ export function HLDCard({ hld, isLoading = false, className = '' }: HLDCardProps
       {/* Data Flows Section */}
       {hasDataFlows && (
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>🔄</span>
-            <span>Data Flows</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <GitBranch className="h-4 w-4 text-[color:var(--color-primary)]" />
+            <span>Data flows</span>
           </h3>
-          <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+          <div className="rounded-xl border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-5">
             <div className="space-y-2">
               {hld.dataFlows!.map((flow: string, index: number) => (
-                <p key={index} className="text-gray-700 flex items-start gap-2">
-                  <span className="text-purple-600 flex-shrink-0">→</span>
-                  <span className="flex-1">{flow}</span>
+                <p key={index} className="flex items-start gap-2 text-sm text-[color:rgba(15,23,42,0.75)]">
+                  <span className="flex-shrink-0 text-[color:var(--color-primary)]">→</span>
+                  <span>{flow}</span>
                 </p>
               ))}
             </div>
@@ -89,18 +90,18 @@ export function HLDCard({ hld, isLoading = false, className = '' }: HLDCardProps
       {/* Technical Risks Section */}
       {hasRisks && (
         <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>⚠️</span>
-            <span>Technical Risks</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <AlertTriangle className="h-4 w-4 text-[color:var(--color-danger)]" />
+            <span>Technical risks</span>
           </h3>
           <div className="space-y-3">
             {hld.risks!.map((risk: string, index: number) => (
               <div
                 key={index}
-                className="flex gap-3 p-4 bg-red-50 rounded-xl border border-red-100 hover:border-red-200 transition-colors"
+                className="flex gap-3 rounded-lg border border-[color:rgba(185,28,28,0.25)] bg-[color:rgba(185,28,28,0.06)] p-4"
               >
-                <span className="text-red-600 font-bold flex-shrink-0">{index + 1}.</span>
-                <p className="text-gray-700 flex-1">{risk}</p>
+                <span className="text-sm font-semibold text-[color:var(--color-danger)]">{index + 1}.</span>
+                <p className="text-sm text-[color:rgba(15,23,42,0.75)]">{risk}</p>
               </div>
             ))}
           </div>
@@ -110,17 +111,17 @@ export function HLDCard({ hld, isLoading = false, className = '' }: HLDCardProps
       {/* Non-Functional Requirements Section */}
       {hasNFRs && (
         <div>
-          <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <span>⚡</span>
-            <span>Non-Functional Requirements</span>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--color-text)]">
+            <Gauge className="h-4 w-4 text-[color:var(--color-primary)]" />
+            <span>Non-functional requirements</span>
           </h3>
           <div className="grid gap-3 md:grid-cols-2">
             {hld.nfrs!.map((nfr: string, index: number) => (
               <div
                 key={index}
-                className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 hover:border-indigo-200 transition-colors"
+                className="rounded-lg border border-[color:rgba(15,23,42,0.12)] bg-[color:var(--color-background)] p-4 text-sm text-[color:rgba(15,23,42,0.75)]"
               >
-                <p className="text-gray-700 leading-relaxed">{nfr}</p>
+                {nfr}
               </div>
             ))}
           </div>
