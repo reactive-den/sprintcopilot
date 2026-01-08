@@ -47,7 +47,10 @@ let cachedClient: S3Client | null = null;
 
 const getS3Client = (region: string) => {
   if (!cachedClient) {
-    cachedClient = new S3Client({ region });
+    cachedClient = new S3Client({
+      region,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+    });
   }
 
   return cachedClient;

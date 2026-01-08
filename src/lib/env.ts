@@ -54,7 +54,7 @@ const envSchema = z.object({
     .string()
     .default('900')
     .transform((val) => parseInt(val, 10))
-    .refine((val) => val > 0 && val <= 3600, 'S3_PRESIGN_EXPIRES_SECONDS must be between 1 and 3600'),
+    .refine((val) => val > 0 && val <= 604800, 'S3_PRESIGN_EXPIRES_SECONDS must be between 1 and 604800'),
   S3_UPLOAD_MAX_BYTES: z
     .string()
     .default('52428800')
