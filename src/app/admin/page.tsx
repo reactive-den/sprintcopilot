@@ -40,6 +40,8 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isAddingSprint, setIsAddingSprint] = useState(false);
+  const [showAddSprintModal, setShowAddSprintModal] = useState(false);
+  const [featureDescription, setFeatureDescription] = useState('');
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
   // Fetch projects from ClickUp on mount
@@ -166,8 +168,17 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddSprint = async () => {
+  const handleAddSprint = () => {
     if (!selectedProjectId) return;
+    setShowAddSprintModal(true);
+    setFeatureDescription('');
+  };
+
+  const handleCreateSprintWithTickets = async () => {
+    if (!selectedProjectId || !featureDescription.trim()) {
+      alert('Please provide a feature description');
+      return;
+    }
 
     setIsAddingSprint(true);
     try {
@@ -175,25 +186,28 @@ export default function AdminPage() {
       const currentSprintCount = folders[0]?.lists?.length || 0;
       const nextSprintNumber = currentSprintCount + 1;
 
-      // Create a new sprint list in ClickUp
-      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/sprint`, {
+      // Create sprint and generate tickets
+      const response = await fetch(`/api/clickup/folder/${selectedProjectId}/sprint-with-tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           sprintNumber: nextSprintNumber,
+          featureDescription: featureDescription.trim(),
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        alert(`✅ Successfully created Sprint ${nextSprintNumber}!`);
+        alert(`✅ Successfully created Sprint ${nextSprintNumber} with ${data.ticketsCreated || 0} tickets!`);
+        setShowAddSprintModal(false);
+        setFeatureDescription('');
         // Refresh the data to show the new sprint
         window.location.reload();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create sprint');
+        alert(error.error || 'Failed to create sprint with tickets');
       }
     } catch (error) {
       console.error('Failed to add sprint:', error);
@@ -262,6 +276,75 @@ export default function AdminPage() {
             </select>
           </div>
         </div>
+
+        {/* Add Sprint Modal */}
+        {showAddSprintModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Add New Sprint</h2>
+                <button
+                  onClick={() => {
+                    setShowAddSprintModal(false);
+                    setFeatureDescription('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <span className="text-2xl">×</span>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Feature Description *
+                  </label>
+                  <textarea
+                    value={featureDescription}
+                    onChange={(e) => setFeatureDescription(e.target.value)}
+                    placeholder="Describe the feature or functionality you want to implement in this sprint..."
+                    className="w-full px-4 py-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all resize-none"
+                    rows={8}
+                    disabled={isAddingSprint}
+                  />
+                  <p className="mt-2 text-sm text-gray-500">
+                    This feature will be used along with your project's HDD, LLDs, and business document context to generate tickets.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleCreateSprintWithTickets}
+                  disabled={isAddingSprint || !featureDescription.trim()}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {isAddingSprint ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Creating Sprint & Tickets...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>➕</span>
+                      <span>Create Sprint</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddSprintModal(false);
+                    setFeatureDescription('');
+                  }}
+                  disabled={isAddingSprint}
+                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {selectedProjectId ? (
           <>
