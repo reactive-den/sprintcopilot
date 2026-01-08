@@ -111,12 +111,16 @@ export default function HDDPage({
     }
   }, [content, sessionId]);
 
-  // Load active section on mount and when it changes
+  // Load all sections when sections are fetched
   useEffect(() => {
-    if (activeSection && !isLoadingSections) {
-      loadSection(activeSection);
+    if (sections.length > 0 && !isLoadingSections) {
+      // Load all sections in parallel
+      sections.forEach((section) => {
+        // loadSection already checks if content exists, so safe to call for all
+        loadSection(section.id);
+      });
     }
-  }, [activeSection, isLoadingSections, loadSection]);
+  }, [sections, isLoadingSections, loadSection]);
 
   const downloadMarkdown = (sectionId: string) => {
     if (!content[sectionId] || typeof window === 'undefined') return;
@@ -234,8 +238,11 @@ export default function HDDPage({
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
+                    disabled={loading[section.id]}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
-                      activeSection === section.id
+                      loading[section.id]
+                        ? 'opacity-50 cursor-not-allowed bg-gray-50'
+                        : activeSection === section.id
                         ? 'bg-indigo-100 text-indigo-700 font-semibold shadow-md'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
