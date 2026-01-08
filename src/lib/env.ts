@@ -40,6 +40,8 @@ const envSchema = z.object({
   // ClickUp Configuration (Optional)
   CLICKUP_API_TOKEN: z.string().optional().or(z.literal('')),
   CLICKUP_LIST_ID: z.string().optional().or(z.literal('')),
+  CLICKUP_SPACE_ID: z.string().optional().or(z.literal('')),
+  CLICKUP_FOLDER_ID: z.string().optional().or(z.literal('')),
 
   // GitHub Configuration (Optional)
   GITHUB_TOKEN: z.string().optional().or(z.literal('')),

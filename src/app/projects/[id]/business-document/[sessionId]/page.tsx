@@ -300,40 +300,33 @@ export default function BusinessDocumentPage({
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push(`/projects/${projectId}`)}
+            onClick={() => router.push(`/projects/${projectId}?showRepoDetails=true`)}
             className="text-indigo-600 hover:text-indigo-700 font-semibold mb-6 flex items-center gap-2 transition-colors group"
           >
             <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
             <span>Back to Project</span>
           </button>
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20 flex items-center justify-between">
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 {businessDocument.title}
               </h1>
               <p className="text-gray-600">Business Requirements Document</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => router.push(`/projects/${projectId}`)}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
-              >
-                <span>🧭</span>
-                <span>Repo Analysis</span>
-              </button>
-              <button
-                onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
+            <button
+              onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
               >
                 <span>📋</span>
-                <span>View HDD</span>
+                <span>Generate HLDs and LLDs</span>
               </button>
               <button
                 onClick={downloadDocument}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 font-semibold transition-all transform hover:scale-105 shadow-md flex items-center gap-2"
               >
                 <span>📥</span>
-                <span>Download</span>
+                <span>Download PDF</span>
               </button>
             </div>
           </div>

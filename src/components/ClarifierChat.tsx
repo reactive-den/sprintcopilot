@@ -63,7 +63,7 @@ export function ClarifierChat({ sessionId, projectId }: ClarifierChatProps) {
 
             if (runResponse.ok) {
               const runData = await runResponse.json();
-              router.push(`/projects/${projectId}?runId=${runData.run.id}`);
+              router.push(`/projects/${projectId}/business-document/${sessionId}`);
             } else {
               const error = await runResponse.json();
               alert(error.error || 'Failed to create run');

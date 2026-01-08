@@ -21,9 +21,15 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   const { data: project, isLoading: isProjectLoading } = useProject(projectId);
   const { data: run, isLoading, error } = useRun(activeRunId || undefined);
-  const { exportCSV, createClickUpTasks, isExporting, exportError } = useExport();
+  const { createClickUpTasks, isExporting, exportError } = useExport();
   const repoSectionRef = useRef<HTMLDivElement | null>(null);
-  const [showRepoDetails, setShowRepoDetails] = useState(false);
+  const [showRepoDetails, setShowRepoDetails] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new URLSearchParams(window.location.search).get('showRepoDetails') === 'true';
+    }
+    return false;
+  });
+  const [isEstimating, setIsEstimating] = useState(false);
 
   useEffect(() => {
     if (runId && !activeRunId) {
@@ -157,32 +163,11 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           {/* Action Buttons */}
           {run.status === 'COMPLETED' && (
             <>
-              {run.tickets && run.tickets.length > 0 && (
-                <div className="mb-4">
-                  <button
-                    onClick={handleEstimateTickets}
-                    disabled={isEstimating}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-2"
-                  >
-                    {isEstimating ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        <span>Estimating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>📊</span>
-                        <span>Estimate Tickets</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
                 {sessionId && (
                   <button
                     onClick={() => router.push(`/projects/${projectId}/business-document/${sessionId}`)}
-                    className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl hover:from-blue-600 hover:to-indigo-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     <span>📄</span>
                     <span>View Business Document</span>
@@ -191,36 +176,27 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 {run.repoAnalysis && (
                   <button
                     onClick={() => {
-                      setShowRepoDetails(true);
-                      repoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      router.push(`/projects/${projectId}?showRepoDetails=true`);
                     }}
-                    className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="px-6 py-4 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-xl hover:from-purple-600 hover:to-fuchsia-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                   >
                     <span>🧭</span>
                     <span>View Repo Analysis</span>
                   </button>
                 )}
-                <button
-                  onClick={() => exportCSV(run.id, run.project.title)}
-                  disabled={isExporting}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  {isExporting ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Exporting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>📥</span>
-                      <span>Export CSV</span>
-                    </>
-                  )}
-                </button>
+                {sessionId && (
+                  <button
+                    onClick={() => router.push(`/projects/${projectId}/hdd/${sessionId}`)}
+                    className="px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    <span>📋</span>
+                    <span>View HLDs and LLDs</span>
+                  </button>
+                )}
                 <button
                   onClick={() => createClickUpTasks(run.id)}
                   disabled={isExporting}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                   {isExporting ? (
                     <>
@@ -234,13 +210,26 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                     </>
                   )}
                 </button>
+                {run.tickets && run.tickets.length > 0 && (
+                  <button
+                    onClick={handleEstimateTickets}
+                    disabled={isEstimating}
+                    className="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {isEstimating ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Estimating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📊</span>
+                        <span>Estimate Tickets</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
-              {exportError && (
-                <div className="mt-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
-                  <span className="text-xl">⚠️</span>
-                  <p className="text-sm text-red-600 flex-1">{exportError}</p>
-                </div>
-              )}
             </>
           )}
 
@@ -279,3 +268,4 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     </div>
   );
 }
+

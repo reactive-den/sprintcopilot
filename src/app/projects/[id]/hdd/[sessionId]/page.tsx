@@ -75,9 +75,15 @@ export default function HDDPage({
     }
   }, [content, sessionId]);
 
+  // Load all sections on mount
   useEffect(() => {
-    loadSection(activeSection);
-  }, [activeSection, loadSection]);
+    const loadAllSections = async () => {
+      for (const section of SECTIONS) {
+        await loadSection(section.id);
+      }
+    };
+    loadAllSections();
+  }, [loadSection]);
 
   const downloadMarkdown = (section: HDDSection) => {
     if (!content[section] || typeof window === 'undefined') return;
@@ -100,10 +106,6 @@ export default function HDDPage({
   };
 
   const handleGenerateTickets = async () => {
-    if (!confirm('Generate tickets based on Business Document, Problem Statement, and HDD?')) {
-      return;
-    }
-
     setIsGeneratingTickets(true);
 
     try {
@@ -113,8 +115,8 @@ export default function HDDPage({
 
       if (response.ok) {
         const { run } = await response.json();
-        // Redirect to project page with the new run
-        router.push(`/projects/${projectId}?runId=${run.id}`);
+        // Redirect to tickets page to view generated tickets
+        router.push(`/projects/${projectId}/tickets/${run.id}`);
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to generate tickets');

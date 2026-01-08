@@ -121,7 +121,10 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
       tshirtSize: ticket.tshirtSize || 'M',
       priority: ticket.priority || 3,
       sprint: ticket.sprint || 1,
-      dependencies: ticket.dependencies || [],
+      // Convert dependencies to strings if they are integers (ticket indices)
+      dependencies: (ticket.dependencies || []).map((dep) =>
+        typeof dep === 'number' ? String(dep) : dep
+      ),
       tags: ticket.tags || [],
     }));
   } catch (error) {
