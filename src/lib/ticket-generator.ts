@@ -69,7 +69,7 @@ Guidelines:
 - Break down work into manageable chunks (typically 4-16 hours each)
 - Use T-shirt sizes: XS (1-2h), S (3-4h), M (5-8h), L (9-16h), XL (17-32h)
 - Priority: 1 = highest, 5 = lowest
-- Sprint numbers should be sequential starting from 1
+- **CRITICAL: All tickets must be assigned to Sprint 1 (sprint: 1). Do NOT create multiple sprints.**
 - Include dependencies as array of ticket indices if tickets depend on others
 - Tags should be relevant (e.g., "frontend", "backend", "database", "api", "ui", "testing")
 
@@ -109,6 +109,7 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
     const tickets = JSON.parse(jsonStr) as PipelineTicket[];
 
     // Validate and ensure all required fields
+    // Force all tickets to Sprint 1
     return tickets.map((ticket, index) => ({
       title: ticket.title || `Ticket ${index + 1}`,
       description: ticket.description || '',
@@ -120,7 +121,7 @@ export async function generateTicketsFromHDD(input: GenerateTicketsInput): Promi
       estimateHours: ticket.estimateHours || 8,
       tshirtSize: ticket.tshirtSize || 'M',
       priority: ticket.priority || 3,
-      sprint: ticket.sprint || 1,
+      sprint: 1, // Force all tickets to Sprint 1
       // Convert dependencies to strings if they are integers (ticket indices)
       dependencies: (ticket.dependencies || []).map((dep) =>
         typeof dep === 'number' ? String(dep) : dep
