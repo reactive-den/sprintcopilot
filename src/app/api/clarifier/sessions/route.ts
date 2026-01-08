@@ -35,19 +35,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const repoQuestion =
-      "What's the GitHub repository URL for this project? If none, say \"no repo\".";
-
-    let initialQuestion = repoQuestion;
-
-    if (project.repoUrl) {
-      const { generateInitialQuestion } = await import('@/lib/clarifier');
-      initialQuestion = await generateInitialQuestion(
-        idea,
-        context || project.problem,
-        constraints || project.constraints
-      );
-    }
+    // Generate initial question
+    const { generateInitialQuestion } = await import('@/lib/clarifier');
+    const initialQuestion = await generateInitialQuestion(
+      idea,
+      context || project.problem,
+      constraints || project.constraints
+    );
 
     // Create initial AI message with the first question
     await prisma.clarifierMessage.create({
